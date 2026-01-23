@@ -1152,9 +1152,10 @@
         const text = (e.clipboardData || window.clipboardData).getData("text");
         if (text) {
           const input = document.getElementById(inputId);
-          input.value = text; // Fill manually
-          openIpFromInput(inputId); // Process
-          e.preventDefault(); // Stop default paste to avoid double text
+          input.value = text.trim();
+          // Use timeout to ensure the value is set and seen by the next function
+          setTimeout(() => openIpFromInput(inputId), 10);
+          e.preventDefault();
         }
       }
 
@@ -1164,11 +1165,13 @@
         if (!text) return;
 
         try {
-          const ipPattern = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-          const match = text.trim().match(ipPattern);
+          // More flexible regex: search for IP anywhere in the text
+          const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+          const match = text.match(ipPattern);
 
           if (match) {
-            const ip = match[0];
+            const ip = match[1];
+            showToast(`Processando IP: ${ip}...`);
             let openedCount = 0;
 
             const urlsToOpen = [];
