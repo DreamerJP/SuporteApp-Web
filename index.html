@@ -278,6 +278,44 @@
         opacity: 1;
       }
 
+      /* Reorder Mode Styles */
+      body.reorder-mode .text-card {
+        cursor: grab;
+        border: 2px dashed var(--accent-color);
+        background: rgba(233, 69, 96, 0.1);
+      }
+
+      body.reorder-mode .text-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(233, 69, 96, 0.3);
+      }
+
+      body.reorder-mode .text-card.dragging {
+        opacity: 0;
+        cursor: grabbing;
+      }
+
+      body.reorder-mode .text-card.drag-over {
+        border-color: var(--success-color);
+        background: rgba(76, 175, 80, 0.2);
+      }
+
+      body.reorder-mode .edit-btn {
+        display: none !important;
+      }
+
+      body.reorder-mode .text-card::before {
+        content: "⋮⋮";
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        color: var(--accent-color);
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
       /* Side Panels (Notepad & Settings) */
       .side-panel {
         width: 300px;
@@ -664,10 +702,8 @@
         <button onclick="openAppPopup()" title="Abrir em Janela Destacada">
           <span>❐</span> Modo Compacto
         </button>
+        <button onclick="openEditModal(-1)"><span>➕</span> Novo Botão</button>
         <button onclick="toggleSettings()"><span>⚙️</span> Config</button>
-        <button onclick="openEditModal(-1)" class="accent-btn">
-          <span>➕</span> Novo
-        </button>
       </div>
     </header>
 
@@ -821,7 +857,7 @@
               <label>Cores do Tema</label>
               <div class="color-picker-row" style="flex-wrap: wrap">
                 <div>
-                  Bg:
+                  Fundo:
                   <input
                     type="color"
                     id="bg-color-picker"
@@ -829,7 +865,7 @@
                   />
                 </div>
                 <div>
-                  Accent:
+                  Destaque:
                   <input
                     type="color"
                     id="accent-color-picker"
@@ -848,6 +884,28 @@
                   Restaurar Padrão
                 </button>
               </div>
+            </div>
+          </details>
+
+          <details class="settings-group">
+            <summary>🔘 Botões</summary>
+            <div class="details-content">
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  cursor: pointer;
+                "
+              >
+                <span>📐 Botões Compactos</span>
+                <input
+                  type="checkbox"
+                  id="compact-mode-toggle"
+                  onchange="toggleCompactMode()"
+                  style="width: auto"
+                />
+              </label>
 
               <div
                 style="
@@ -864,14 +922,17 @@
                   cursor: pointer;
                 "
               >
-                <span>📐 Modo Compacto</span>
+                <span>⋮⋮ Reorganizar Botões</span>
                 <input
                   type="checkbox"
-                  id="compact-mode-toggle"
-                  onchange="toggleCompactMode()"
+                  id="reorder-mode-toggle"
+                  onchange="toggleReorderMode()"
                   style="width: auto"
                 />
               </label>
+              <p style="font-size: 0.8rem; color: #888; margin-top: 5px">
+                *Ative para arrastar e reorganizar os botões.
+              </p>
             </div>
           </details>
 
@@ -989,6 +1050,7 @@
       let categories = new Set(["Geral"]);
       let currentCategory = "Todas";
       let ipPorts = [8081];
+      let isReorderMode = false;
 
       document.addEventListener("DOMContentLoaded", () => {
         loadSettings(); // Now includes ports
@@ -1140,10 +1202,22 @@
           (t) => currentCategory === "Todas" || t.category === currentCategory,
         );
 
-        filtered.forEach((item) => {
+        filtered.forEach((item, index) => {
           const card = document.createElement("div");
           card.className = "text-card";
-          card.onclick = () => copyText(item.text);
+          card.dataset.index = allTexts.indexOf(item);
+
+          // Set draggable only in reorder mode
+          if (isReorderMode) {
+            card.draggable = true;
+            card.addEventListener("dragstart", handleDragStart);
+            card.addEventListener("dragend", handleDragEnd);
+            card.addEventListener("dragover", handleDragOver);
+            card.addEventListener("drop", handleDrop);
+            card.addEventListener("dragleave", handleDragLeave);
+          } else {
+            card.onclick = () => copyText(item.text);
+          }
 
           card.innerHTML = `
                     <div class="card-label">${item.label}</div>
@@ -1159,6 +1233,95 @@
         currentCategory = cat;
         renderCategories(); // Update active state
         renderButtons();
+      }
+
+      // --- Reorder Mode Functions ---
+      let draggedElement = null;
+
+      function toggleReorderMode() {
+        const checkbox = document.getElementById("reorder-mode-toggle");
+
+        // If called from checkbox, use its state; otherwise toggle
+        if (checkbox) {
+          isReorderMode = checkbox.checked;
+        } else {
+          isReorderMode = !isReorderMode;
+        }
+
+        if (isReorderMode) {
+          document.body.classList.add("reorder-mode");
+          if (checkbox) checkbox.checked = true;
+          showToast("Modo de reorganização ativado! Arraste os botões.", false);
+        } else {
+          document.body.classList.remove("reorder-mode");
+          if (checkbox) checkbox.checked = false;
+          showToast("Modo de reorganização desativado.", false);
+        }
+
+        renderButtons(); // Re-render to apply/remove drag handlers
+      }
+
+      function handleDragStart(e) {
+        draggedElement = e.target;
+        e.target.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/html", e.target.innerHTML);
+      }
+
+      function handleDragEnd(e) {
+        e.target.classList.remove("dragging");
+
+        // Remove all drag-over classes
+        document.querySelectorAll(".text-card").forEach((card) => {
+          card.classList.remove("drag-over");
+        });
+      }
+
+      function handleDragOver(e) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+
+        e.dataTransfer.dropEffect = "move";
+
+        const target = e.target.closest(".text-card");
+        if (target && target !== draggedElement) {
+          target.classList.add("drag-over");
+        }
+
+        return false;
+      }
+
+      function handleDragLeave(e) {
+        const target = e.target.closest(".text-card");
+        if (target) {
+          target.classList.remove("drag-over");
+        }
+      }
+
+      function handleDrop(e) {
+        if (e.stopPropagation) {
+          e.stopPropagation();
+        }
+
+        const target = e.target.closest(".text-card");
+
+        if (draggedElement !== target && target) {
+          const draggedIndex = parseInt(draggedElement.dataset.index);
+          const targetIndex = parseInt(target.dataset.index);
+
+          // Swap items in array
+          const temp = allTexts[draggedIndex];
+          allTexts[draggedIndex] = allTexts[targetIndex];
+          allTexts[targetIndex] = temp;
+
+          // Save and re-render
+          saveLocalTexts();
+          renderButtons();
+          showToast("Ordem atualizada!", false);
+        }
+
+        return false;
       }
 
       // --- Actions ---
