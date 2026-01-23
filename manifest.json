@@ -28,7 +28,7 @@
   ],
   "shortcuts": [
     {
-      "name": "Abrir Popup",
+      "name": "Abrir no modo compacto",
       "url": "./index.html?mode=popup",
       "description": "Abrir o app diretamente no modo compacto"
     }

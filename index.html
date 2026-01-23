@@ -654,7 +654,7 @@
             id="ip-input"
             placeholder="Cole o IP para abrir..."
             onkeypress="checkIpEnter(event)"
-            onpaste="setTimeout(openIpFromInput, 100)"
+            onpaste="setTimeout(openIpFromInput, 100, 'ip-input')"
           />
         </div>
         <button onclick="toggleNotepad()">
@@ -687,7 +687,7 @@
             onkeypress="
               if (event.key === 'Enter') openIpFromInput('ip-input-popup');
             "
-            onpaste="setTimeout(() => openIpFromInput('ip-input-popup'), 100)"
+            onpaste="setTimeout(openIpFromInput, 100, 'ip-input-popup')"
           />
         </div>
       </div>
