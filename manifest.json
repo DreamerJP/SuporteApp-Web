@@ -1,0 +1,36 @@
+{
+  "name": "SuporteApp Web 3.7",
+  "short_name": "SuporteApp",
+  "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e94560",
+  "categories": ["productivity", "utilities"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Interface Principal do SuporteApp"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Abrir Popup",
+      "url": "./index.html?mode=popup",
+      "description": "Abrir o app diretamente no modo compacto"
+    }
+  ]
+}
