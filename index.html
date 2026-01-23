@@ -655,6 +655,7 @@
             placeholder="Cole o IP para abrir..."
             onkeypress="if (event.key === 'Enter') openIpFromInput('ip-input');"
             onpaste="handlePaste(event, 'ip-input')"
+            oninput="handleInput(event, 'ip-input')"
           />
         </div>
         <button onclick="toggleNotepad()">
@@ -688,6 +689,7 @@
               if (event.key === 'Enter') openIpFromInput('ip-input-popup');
             "
             onpaste="handlePaste(event, 'ip-input-popup')"
+            oninput="handleInput(event, 'ip-input-popup')"
           />
         </div>
       </div>
@@ -1162,6 +1164,27 @@
           // Chama imediatamente para manter o 'vínculo' com o clique/gesto do usuário
           openIpFromInput(inputId);
         }
+      }
+
+      let inputTimers = {};
+
+      function handleInput(e, inputId) {
+        console.log("Input event no ID:", inputId);
+        if (inputTimers[inputId]) {
+          clearTimeout(inputTimers[inputId]);
+        }
+
+        inputTimers[inputId] = setTimeout(() => {
+          const input = document.getElementById(inputId);
+          const text = input.value;
+          console.log("Auto-check após input:", text);
+
+          const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
+          if (text && text.match(ipPattern)) {
+            console.log("IP detectado via input, disparando abertura...");
+            openIpFromInput(inputId);
+          }
+        }, 300);
       }
 
       function openIpFromInput(inputId = "ip-input") {
