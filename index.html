@@ -1,0 +1,1652 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuporteApp Web</title>
+    <style>
+      :root {
+        --bg-color: #1a1a2e;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --primary-color: #0f3460;
+        --accent-color: #e94560;
+        --text-color: #ffffff;
+        --text-secondary: #a0a0a0;
+        --success-color: #4caf50;
+        --card-hover: rgba(255, 255, 255, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI Emoji", "Inter", sans-serif;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent-color) var(--bg-color);
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(233, 69, 96, 0.1) 0%,
+            transparent 20%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(15, 52, 96, 0.2) 0%,
+            transparent 20%
+          );
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Header */
+      header {
+        background: rgba(26, 26, 46, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--glass-border);
+        z-index: 100;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--accent-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .header-tools {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .ip-group {
+        display: flex;
+        gap: 5px;
+      }
+
+      #ip-input {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--glass-border);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        width: 200px;
+        outline: none;
+        transition: all 0.3s;
+      }
+
+      #ip-input:focus {
+        border-color: var(--accent-color);
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      .popup-ip-group {
+        display: none;
+      }
+
+      #ip-input-popup {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--glass-border);
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        width: 150px;
+        outline: none;
+        transition: all 0.3s;
+        font-size: 0.85rem;
+      }
+
+      #ip-input-popup:focus {
+        border-color: var(--accent-color);
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      /* Buttons Global */
+      button {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        color: var(--text-color);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      button:hover {
+        background: var(--card-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border-color: var(--accent-color);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .accent-btn {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+      }
+      .accent-btn:hover {
+        background: #d63d56;
+      }
+
+      /* Main Layout */
+      main {
+        display: flex;
+        flex: 1;
+        height: calc(100vh - 70px);
+      }
+
+      /* Sidebar / Tabs */
+      .sidebar {
+        width: 250px;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(5px);
+        border-right: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        overflow-y: auto;
+      }
+
+      #category-list {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .category-btn {
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        text-align: left;
+        border-radius: 0;
+        border-left: 3px solid transparent;
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .category-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: none;
+        box-shadow: none;
+      }
+
+      .category-btn.active {
+        background: linear-gradient(
+          90deg,
+          rgba(233, 69, 96, 0.2) 0%,
+          transparent 100%
+        );
+        border-left-color: var(--accent-color);
+        color: white;
+        font-weight: bold;
+      }
+
+      /* Content Area */
+      .content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-auto-rows: max-content;
+        gap: 15px;
+        position: relative;
+      }
+
+      /* Action Cards */
+      .text-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        min-height: 80px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .text-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-5px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .text-card:active {
+        transform: scale(0.95);
+      }
+
+      .card-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+        pointer-events: none;
+      }
+
+      .card-preview {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        pointer-events: none;
+      }
+
+      .edit-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        padding: 4px;
+        background: transparent;
+        border: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .text-card:hover .edit-btn {
+        opacity: 1;
+      }
+
+      /* Side Panels (Notepad & Settings) */
+      .side-panel {
+        width: 300px;
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .side-panel.collapsed {
+        width: 0;
+        border: none;
+      }
+
+      .panel-header {
+        padding: 10px 15px;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+
+      .panel-content {
+        padding: 15px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      /* Notepad Specifics */
+      .notepad-toolbar {
+        padding: 5px;
+        display: flex;
+        gap: 5px;
+        border-bottom: 1px solid var(--glass-border);
+      }
+
+      .tool-btn {
+        padding: 5px;
+        border-radius: 4px;
+        border: none;
+        background: transparent;
+      }
+
+      .tool-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      #notepad-content {
+        flex: 1;
+        padding: 15px;
+        background: transparent;
+        border: none;
+        color: white;
+        resize: none;
+        outline: none;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        overflow-y: auto;
+      }
+
+      /* Toast Notification */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 2000;
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--glass-border);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-color);
+      }
+      /* Settings Modal */
+      .settings-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .settings-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .settings-input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid var(--glass-border);
+        background: rgba(0, 0, 0, 0.2);
+        color: white;
+        outline: none;
+      }
+
+      .settings-input:focus {
+        border-color: var(--accent-color);
+      }
+
+      .color-picker-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 5px;
+      }
+
+      .tag {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .tag span {
+        cursor: pointer;
+        color: #ff6b6b;
+        font-weight: bold;
+      }
+
+      details {
+        margin-bottom: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        border: 1px solid var(--glass-border);
+      }
+
+      summary {
+        padding: 10px;
+        cursor: pointer;
+        font-weight: 500;
+        list-style: none; /* Remove default triangle */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      summary::after {
+        content: "▼";
+        font-size: 0.8rem;
+        transition: transform 0.2s;
+      }
+
+      details[open] summary::after {
+        transform: rotate(180deg);
+      }
+
+      .details-content {
+        padding: 10px;
+        border-top: 1px solid var(--glass-border);
+      }
+
+      /* Modal System */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 3000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: rgba(30, 30, 47, 0.6); /* Semi-transparent */
+        backdrop-filter: blur(15px); /* Strong glass effect */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        position: relative;
+        width: 90%;
+        max-width: 800px;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        transition: color 0.2s;
+      }
+
+      .close-modal:hover {
+        color: white;
+      }
+      /* Compact Mode */
+      body.compact-mode .text-card {
+        padding: 8px;
+        min-height: 50px;
+      }
+
+      body.compact-mode .card-label {
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+      }
+
+      body.compact-mode .card-preview {
+        font-size: 0.7rem;
+      }
+
+      body.compact-mode .content {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+      }
+
+      /* --- POPUP LAYOUT MODE (Standalone Window) --- */
+      body.popup-layout {
+        --bg-color: #2b2b3d; /* Darker solid background maybe? Keeping glass for now but styled */
+      }
+
+      body.popup-layout header {
+        display: none; /* Hide main header to save space */
+      }
+
+      body.popup-layout main {
+        flex-direction: column; /* Stack vertically */
+        height: 100vh;
+      }
+
+      body.popup-layout .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        padding: 5px 15px;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        background: rgba(0, 0, 0, 0.3);
+        flex-shrink: 0;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: visible;
+      }
+
+      body.popup-layout .popup-ip-group {
+        display: flex;
+        margin-left: 15px;
+      }
+
+      body.popup-layout #category-list {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      body.popup-layout #category-list::-webkit-scrollbar {
+        display: none;
+      }
+
+      body.popup-layout .category-btn {
+        width: auto;
+        padding: 8px 15px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        border-radius: 4px 4px 0 0;
+        margin-right: 5px;
+      }
+
+      body.popup-layout .category-btn.active {
+        background: rgba(255, 255, 255, 0.1);
+        border-left-color: transparent;
+        border-bottom-color: var(--accent-color);
+      }
+
+      body.popup-layout .content {
+        padding: 10px;
+        grid-template-columns: repeat(
+          auto-fill,
+          minmax(180px, 1fr)
+        ); /* Dense grid */
+        gap: 8px;
+        align-content: start; /* Pack to top */
+      }
+
+      body.popup-layout .text-card {
+        min-height: 40px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        background: #473e66; /* Button-like color from image reference */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body.popup-layout .text-card:hover {
+        background: #5b5080;
+        transform: translateY(-2px);
+      }
+
+      body.popup-layout .card-label {
+        font-size: 0.9rem;
+        margin: 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+      }
+
+      body.popup-layout .card-preview,
+      body.popup-layout .edit-btn {
+        display: none; /* Hide preview and edit button in this mode */
+      }
+
+      /* Optional: A small settings trigger for Popup Mode could be added if needed, 
+         but for now it's pure usage mode as requested */
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="logo"><span>🚀</span> SuporteApp Web</div>
+      <div class="header-tools">
+        <div class="ip-group">
+          <input
+            type="text"
+            id="ip-input"
+            placeholder="Cole o IP para abrir..."
+            onkeypress="checkIpEnter(event)"
+            onpaste="setTimeout(openIpFromInput, 100)"
+          />
+        </div>
+        <button onclick="toggleNotepad()">
+          <span>📝</span> Bloco de Notas
+        </button>
+        <button onclick="openAppPopup()" title="Abrir em Janela Destacada">
+          <span>❐</span> Modo Compacto
+        </button>
+        <button onclick="toggleSettings()"><span>⚙️</span> Config</button>
+        <button onclick="openEditModal(-1)" class="accent-btn">
+          <span>➕</span> Novo
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <div class="sidebar">
+        <div id="category-list">
+          <button class="category-btn active" onclick="filterCategory('Todas')">
+            Todas
+          </button>
+          <!-- Categories will be injected here JS -->
+        </div>
+        <div class="ip-group popup-ip-group">
+          <input
+            type="text"
+            id="ip-input-popup"
+            placeholder="Abrir IP..."
+            onkeypress="
+              if (event.key === 'Enter') openIpFromInput('ip-input-popup');
+            "
+            onpaste="setTimeout(() => openIpFromInput('ip-input-popup'), 100)"
+          />
+        </div>
+      </div>
+
+      <!-- Buttons Grid -->
+      <div class="content" id="buttons-grid">
+        <!-- Buttons will be injected here via JS -->
+        <div
+          style="
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 50px;
+            color: #666;
+          "
+        >
+          Carregando textos...<br />
+          <small>Certifique-se que o arquivo texts.json está na pasta.</small>
+        </div>
+      </div>
+
+      <!-- Notepad Panel -->
+      <div class="side-panel collapsed" id="notepad-panel">
+        <div class="panel-header">
+          Anotações Rápidas
+          <button class="tool-btn" onclick="toggleNotepad()">✕</button>
+        </div>
+        <div class="notepad-toolbar">
+          <button
+            class="tool-btn"
+            onclick="document.execCommand('bold', false, null)"
+          >
+            <b>B</b>
+          </button>
+          <button
+            class="tool-btn"
+            onclick="document.execCommand('italic', false, null)"
+          >
+            <i>I</i>
+          </button>
+          <button
+            class="tool-btn"
+            onclick="document.execCommand('underline', false, null)"
+          >
+            <u>U</u>
+          </button>
+          <button class="tool-btn" onclick="saveNotepad()">💾</button>
+        </div>
+        <div
+          id="notepad-content"
+          contenteditable="true"
+          spellcheck="false"
+          style="padding: 15px; flex: 1; outline: none; overflow-y: auto"
+        >
+          <!-- Content will vary -->
+        </div>
+      </div>
+
+      <!-- Edit Modal -->
+      <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+          <div class="close-modal" onclick="closeEditModal()">✕</div>
+          <h2
+            id="edit-modal-title"
+            style="color: var(--accent-color); margin-bottom: 20px"
+          >
+            Editar Texto
+          </h2>
+
+          <input type="hidden" id="edit-index" />
+
+          <div class="settings-group">
+            <label>🏷️ Rótulo (Título do Botão)</label>
+            <input type="text" id="edit-label" class="settings-input" />
+          </div>
+
+          <div class="settings-group">
+            <label>💬 Texto (Conteúdo)</label>
+            <textarea
+              id="edit-text"
+              class="settings-input"
+              style="height: 100px; resize: vertical"
+            ></textarea>
+          </div>
+
+          <div class="settings-group">
+            <label>📂 Categoria</label>
+            <input
+              type="text"
+              id="edit-category"
+              class="settings-input"
+              list="category-suggestions"
+            />
+            <datalist id="category-suggestions">
+              <!-- Javascript will populate this -->
+            </datalist>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px">
+            <button
+              onclick="deleteText()"
+              id="btn-delete"
+              style="border-color: #ff6b6b; color: #ff6b6b"
+            >
+              🗑️ Excluir
+            </button>
+            <div style="flex: 1"></div>
+            <button onclick="closeEditModal()">Cancelar</button>
+            <button
+              onclick="saveText()"
+              class="accent-btn"
+              style="min-width: 100px"
+            >
+              💾 Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div class="side-panel collapsed" id="settings-panel">
+        <div class="panel-header">
+          Configurações
+          <button class="tool-btn" onclick="toggleSettings()">✕</button>
+        </div>
+        <div class="panel-content">
+          <details class="settings-group">
+            <summary>🎨 Aparência</summary>
+            <div class="details-content">
+              <label>Cores do Tema</label>
+              <div class="color-picker-row" style="flex-wrap: wrap">
+                <div>
+                  Bg:
+                  <input
+                    type="color"
+                    id="bg-color-picker"
+                    onchange="updateTheme()"
+                  />
+                </div>
+                <div>
+                  Accent:
+                  <input
+                    type="color"
+                    id="accent-color-picker"
+                    onchange="updateTheme()"
+                  />
+                </div>
+                <button
+                  onclick="resetTheme()"
+                  style="
+                    padding: 4px 8px;
+                    font-size: 0.8rem;
+                    width: 100%;
+                    margin-top: 5px;
+                  "
+                >
+                  Restaurar Padrão
+                </button>
+              </div>
+
+              <div
+                style="
+                  border-top: 1px solid var(--glass-border);
+                  margin: 15px 0;
+                "
+              ></div>
+
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  cursor: pointer;
+                "
+              >
+                <span>📐 Modo Compacto</span>
+                <input
+                  type="checkbox"
+                  id="compact-mode-toggle"
+                  onchange="toggleCompactMode()"
+                  style="width: auto"
+                />
+              </label>
+            </div>
+          </details>
+
+          <details class="settings-group">
+            <summary>🌐 Configuração de Portas</summary>
+            <div class="details-content">
+              <label>Portas adicionais para abrir com o IP:</label>
+              <div style="display: flex; gap: 5px">
+                <input
+                  type="number"
+                  id="new-port-input"
+                  class="settings-input"
+                  placeholder="Ex: 8080"
+                  style="flex: 1"
+                />
+                <button onclick="addPort()" style="padding: 0 15px">+</button>
+              </div>
+              <div class="tag-container" id="ports-list">
+                <!-- Tags will be injected here -->
+              </div>
+              <p style="font-size: 0.8rem; color: #888; margin-top: 5px">
+                *Clique no X para remover.
+              </p>
+            </div>
+          </details>
+
+          <details class="settings-group">
+            <summary>💾 Dados e Backup</summary>
+            <div class="details-content">
+              <label style="margin-top: 10px"
+                >🔗 URL do JSON (Textos dos Botões)</label
+              >
+              <input
+                type="text"
+                class="settings-input"
+                id="json-url-input"
+                placeholder="https://exemplo.com/texts.json"
+              />
+              <button
+                onclick="saveJsonUrl()"
+                style="margin-top: 5px; width: 100%"
+              >
+                Salvar e Recarregar
+              </button>
+
+              <div
+                style="
+                  border-top: 1px solid var(--glass-border);
+                  margin: 15px 0;
+                "
+              ></div>
+
+              <label>� Backup Completo (Tudo)</label>
+              <div style="display: flex; gap: 10px; margin-bottom: 10px">
+                <button
+                  onclick="document.getElementById('config-import').click()"
+                  style="flex: 1"
+                >
+                  📥 Restaurar Backup
+                </button>
+                <button onclick="exportFullConfig()" style="flex: 1">
+                  📤 Baixar Backup
+                </button>
+              </div>
+              <input
+                type="file"
+                id="config-import"
+                style="display: none"
+                accept=".json"
+                onchange="importFullConfig(this)"
+              />
+
+              <label>📄 Apenas Textos dos Botões (JSON)</label>
+              <div style="display: flex; gap: 10px">
+                <button
+                  onclick="document.getElementById('file-import').click()"
+                  style="flex: 1"
+                >
+                  📥 Importar Lista
+                </button>
+                <button onclick="exportJson()" style="flex: 1">
+                  📤 Exportar Lista
+                </button>
+              </div>
+              <input
+                type="file"
+                id="file-import"
+                style="display: none"
+                accept=".json"
+                onchange="importJson(this)"
+              />
+
+              <div style="margin-top: 20px">
+                <button
+                  onclick="clearLocalData()"
+                  style="width: 100%; border-color: red; color: #ff6b6b"
+                >
+                  ⚠ Resetar Tudo
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+      <span>✅</span> <span id="toast-msg">Texto copiado!</span>
+    </div>
+
+    <script>
+      // --- State Management ---
+      let allTexts = [];
+      let categories = new Set(["Geral"]);
+      let currentCategory = "Todas";
+      let ipPorts = [8081];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadSettings(); // Now includes ports
+        loadTexts();
+        loadNotepad();
+
+        // Setup notepad autosave
+        const notepad = document.getElementById("notepad-content");
+        notepad.addEventListener("input", () => {
+          // Debounce save could be implemented here
+        });
+      });
+
+      // --- Data Loading ---
+      async function loadTexts() {
+        // 1. Try LocalStorage (User's custom copy)
+        const localData = localStorage.getItem("suporteApp_texts");
+        if (localData) {
+          console.log("Carregado do armazenamento local");
+          processData(JSON.parse(localData));
+          return;
+        }
+
+        // 2. Try Fetch from Configured URL or Default
+        const configUrl = localStorage.getItem("suporteApp_jsonUrl");
+        const urlToFetch = configUrl || "texts.json";
+
+        try {
+          const response = await fetch(urlToFetch);
+          if (!response.ok) throw new Error(`Falha ao carregar ${urlToFetch}`);
+
+          const data = await response.json();
+          processData(data);
+
+          // Save a local copy for the user
+          saveLocalTexts();
+        } catch (err) {
+          console.error(err);
+          // Fallback demo data
+          document.getElementById("buttons-grid").innerHTML = `
+                   <div style="grid-column: 1/-1; text-align: center; padding: 20px; background: rgba(255,0,0,0.1); border-radius: 8px;">
+                        Erro ao carregar 'texts.json' e nenhum dado local encontrado.<br>
+                        Se estiver abrindo direto o arquivo .html, navegadores bloqueiam leitura de arquivo local.<br>
+                        Use um servidor local ou configure o navegador.<br><br>
+                        <button onclick='useDemoData()'>Carregar Dados de Demonstração</button>
+                   </div>
+                `;
+        }
+      }
+
+      function saveLocalTexts() {
+        if (allTexts.length > 0) {
+          localStorage.setItem("suporteApp_texts", JSON.stringify(allTexts));
+        }
+      }
+
+      function useDemoData() {
+        const demoData = [
+          ["Olá! Como posso ajudar?", "Saudação", "Atendimento"],
+          ["Reinicie o modem.", "Reiniciar Modem", "Técnico"],
+          ["Verifique os cabos.", "Verificar Cabos", "Técnico"],
+          ["Obrigado pelo contato!", "Despedida", "Atendimento"],
+        ];
+        processData(demoData);
+        saveLocalTexts();
+      }
+
+      function processData(data) {
+        // Normalize data (Handle both Array-of-Arrays from JSON and Array-of-Objects from LocalStorage)
+        allTexts = data.map((item) => {
+          // If already an object (from LocalStorage)
+          if (item.text && item.label) return item;
+
+          // If Array (from original texts.json)
+          // Handle [text, label, category] vs [text, label]
+          if (item.length === 2)
+            return { text: item[0], label: item[1], category: "Geral" };
+          return {
+            text: item[0],
+            label: item[1],
+            category: item[2] || "Geral",
+          };
+        });
+
+        // Extract categories
+        categories = new Set(["Geral"]);
+        allTexts.forEach((t) => categories.add(t.category));
+
+        renderCategories();
+        renderButtons();
+      }
+
+      // --- Rendering ---
+      function renderCategories() {
+        const container = document.getElementById("category-list");
+        container.innerHTML = `<button class="category-btn ${currentCategory === "Todas" ? "active" : ""}" onclick="filterCategory('Todas')">Todas</button>`;
+
+        Array.from(categories)
+          .sort()
+          .forEach((cat) => {
+            const btn = document.createElement("button");
+            btn.className = `category-btn ${currentCategory === cat ? "active" : ""}`;
+            btn.innerText = cat;
+            btn.onclick = () => filterCategory(cat);
+            container.appendChild(btn);
+          });
+      }
+
+      function renderButtons() {
+        const container = document.getElementById("buttons-grid");
+        container.innerHTML = "";
+
+        const filtered = allTexts.filter(
+          (t) => currentCategory === "Todas" || t.category === currentCategory,
+        );
+
+        filtered.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "text-card";
+          card.onclick = () => copyText(item.text);
+
+          card.innerHTML = `
+                    <div class="card-label">${item.label}</div>
+                    <div class="card-preview">${item.text}</div>
+                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${allTexts.indexOf(item)})">✏️</button>
+                `;
+
+          container.appendChild(card);
+        });
+      }
+
+      function filterCategory(cat) {
+        currentCategory = cat;
+        renderCategories(); // Update active state
+        renderButtons();
+      }
+
+      // --- Actions ---
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("Copiado com sucesso!");
+        } catch (err) {
+          console.error("Erro ao copiar", err);
+          showToast("Erro ao copiar :(", true);
+        }
+      }
+
+      function showToast(msg, isError = false) {
+        const toast = document.getElementById("toast");
+        const msgEl = document.getElementById("toast-msg");
+        msgEl.innerText = msg;
+        toast.style.background = isError
+          ? "rgba(233, 69, 96, 0.9)"
+          : "rgba(76, 175, 80, 0.9)";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+      }
+
+      // --- IP Opener ---
+      // --- IP Opener (Input Based) ---
+      function checkIpEnter(e) {
+        if (e.key === "Enter") openIpFromInput();
+      }
+
+      function openIpFromInput(inputId = "ip-input") {
+        const input = document.getElementById(inputId);
+        const text = input.value;
+        if (!text) return;
+
+        try {
+          const ipPattern = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+          const match = text.trim().match(ipPattern);
+
+          if (match) {
+            const ip = match[0];
+            let openedCount = 0;
+
+            const urlsToOpen = [];
+            urlsToOpen.push(`http://${ip}`);
+            urlsToOpen.push(`https://${ip}`);
+
+            ipPorts.forEach((port) => {
+              if (port !== 80 && port !== 443) {
+                urlsToOpen.push(`http://${ip}:${port}`);
+                urlsToOpen.push(`https://${ip}:${port}`);
+              }
+            });
+
+            // Execute opens
+            urlsToOpen.forEach((url) => {
+              const win = window.open(url, "_blank");
+              if (win) openedCount++;
+            });
+
+            if (openedCount === 0) {
+              showToast("Pop-ups bloqueados! Permita pop-ups.", true);
+            } else {
+              showToast(`IP ${ip} aberto em ${openedCount} abas!`);
+              input.value = ""; // Clear after success
+            }
+          } else {
+            showToast("IP inválido digitado.", true);
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("Erro ao processar IP.", true);
+        }
+      }
+
+      // --- Notepad Logic (Mock Persistence) ---
+      function toggleNotepad() {
+        const panel = document.getElementById("notepad-panel");
+        panel.classList.toggle("collapsed");
+      }
+
+      function loadNotepad() {
+        // In a real scenario we would fetch notepad.json
+        // Here we use localStorage for the Web POC
+        const saved = localStorage.getItem("suporteApp_notepad");
+        if (saved) {
+          document.getElementById("notepad-content").innerHTML = saved;
+        } else {
+          document.getElementById("notepad-content").innerHTML =
+            "Digite suas anotações aqui...";
+        }
+      }
+
+      function saveNotepad() {
+        const content = document.getElementById("notepad-content").innerHTML;
+        localStorage.setItem("suporteApp_notepad", content);
+        showToast("Anotações salvas!");
+        // To strictly follow "notepad.json external":
+        // We would need a backend to POST this content to write to file.
+      }
+
+      // --- Settings Logic ---
+      function toggleSettings() {
+        const panel = document.getElementById("settings-panel");
+        const isCollapsed = panel.classList.contains("collapsed");
+
+        // Close notepad if open (optional exclusive mode)
+        if (isCollapsed) {
+          document.getElementById("notepad-panel").classList.add("collapsed");
+        }
+
+        panel.classList.toggle("collapsed");
+
+        if (!panel.classList.contains("collapsed")) {
+          // Load current values
+          const root = document.documentElement;
+          const bg = getComputedStyle(root)
+            .getPropertyValue("--bg-color")
+            .trim();
+          const accent = getComputedStyle(root)
+            .getPropertyValue("--accent-color")
+            .trim();
+
+          document.getElementById("bg-color-picker").value = bg;
+          document.getElementById("accent-color-picker").value = accent;
+          document.getElementById("json-url-input").value =
+            localStorage.getItem("suporteApp_jsonUrl") || "";
+
+          renderPorts();
+        }
+      }
+
+      // --- Ports Management ---
+      function renderPorts() {
+        const container = document.getElementById("ports-list");
+        container.innerHTML = "";
+        ipPorts.forEach((port) => {
+          const tag = document.createElement("div");
+          tag.className = "tag";
+          tag.innerHTML = `${port} <span onclick="removePort(${port})">✕</span>`;
+          container.appendChild(tag);
+        });
+      }
+
+      function addPort() {
+        const input = document.getElementById("new-port-input");
+        const port = parseInt(input.value);
+        if (port && !ipPorts.includes(port)) {
+          ipPorts.push(port);
+          savePorts();
+          renderPorts();
+          input.value = "";
+        }
+      }
+
+      function removePort(port) {
+        ipPorts = ipPorts.filter((p) => p !== port);
+        savePorts();
+        renderPorts();
+      }
+
+      function savePorts() {
+        localStorage.setItem("suporteApp_ports", JSON.stringify(ipPorts));
+      }
+
+      function loadPorts() {
+        // Called by loadSettings/Init
+        const saved = JSON.parse(localStorage.getItem("suporteApp_ports"));
+        if (saved) ipPorts = saved;
+      }
+
+      function updateTheme() {
+        const bg = document.getElementById("bg-color-picker").value;
+        const accent = document.getElementById("accent-color-picker").value;
+
+        document.documentElement.style.setProperty("--bg-color", bg);
+        document.documentElement.style.setProperty("--accent-color", accent);
+
+        localStorage.setItem(
+          "suporteApp_theme",
+          JSON.stringify({ bg, accent }),
+        );
+      }
+
+      function resetTheme() {
+        document.documentElement.style.removeProperty("--bg-color");
+        document.documentElement.style.removeProperty("--accent-color");
+        localStorage.removeItem("suporteApp_theme");
+
+        // Refresh inputs if panel is open
+        const root = document.documentElement;
+        // Small delay to ensure styles are re-applied
+        setTimeout(() => {
+          const bg = getComputedStyle(root)
+            .getPropertyValue("--bg-color")
+            .trim();
+          const accent = getComputedStyle(root)
+            .getPropertyValue("--accent-color")
+            .trim();
+          document.getElementById("bg-color-picker").value = bg;
+          document.getElementById("accent-color-picker").value = accent;
+        }, 50);
+      }
+
+      function loadSettings() {
+        const theme = JSON.parse(localStorage.getItem("suporteApp_theme"));
+        if (theme) {
+          document.documentElement.style.setProperty("--bg-color", theme.bg);
+          document.documentElement.style.setProperty(
+            "--accent-color",
+            theme.accent,
+          );
+        }
+
+        // Load Compact Mode
+        const isCompact = localStorage.getItem("suporteApp_compact") === "true";
+        if (isCompact) {
+          document.body.classList.add("compact-mode");
+          document.getElementById("compact-mode-toggle").checked = true;
+        }
+
+        // Check for Popup Layout Mode (URL Param)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("mode") === "popup") {
+          document.body.classList.add("popup-layout");
+          // Save only on user actions or close - no background timer
+          window.addEventListener("resize", saveWindowDimensions);
+          window.addEventListener("beforeunload", saveWindowDimensions);
+        }
+
+        loadPorts();
+      }
+
+      function saveWindowDimensions() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("mode") !== "popup") return;
+
+        const dims = {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          left: window.screenX,
+          top: window.screenY,
+        };
+
+        // Safety: only save if window is in a valid state
+        if (dims.width > 100 && dims.height > 50) {
+          localStorage.setItem("suporteApp_popupDims", JSON.stringify(dims));
+        }
+      }
+
+      function toggleCompactMode() {
+        const isCompact = document.getElementById(
+          "compact-mode-toggle",
+        ).checked;
+        if (isCompact) {
+          document.body.classList.add("compact-mode");
+          localStorage.setItem("suporteApp_compact", "true");
+        } else {
+          document.body.classList.remove("compact-mode");
+          localStorage.setItem("suporteApp_compact", "false");
+        }
+      }
+
+      function clearLocalData() {
+        if (
+          confirm(
+            "Tem certeza? Isso apagará seus textos, portas e configurações.",
+          )
+        ) {
+          localStorage.removeItem("suporteApp_texts");
+          localStorage.removeItem("suporteApp_ports");
+          localStorage.removeItem("suporteApp_jsonUrl");
+          localStorage.removeItem("suporteApp_theme");
+          localStorage.removeItem("suporteApp_notepad");
+          location.reload();
+        }
+      }
+
+      function exportFullConfig() {
+        const backup = {
+          version: 1,
+          timestamp: new Date().toISOString(),
+          settings: {
+            theme: JSON.parse(localStorage.getItem("suporteApp_theme")),
+            jsonUrl: localStorage.getItem("suporteApp_jsonUrl"),
+            ports: JSON.parse(localStorage.getItem("suporteApp_ports") || "[]"),
+          },
+          data: {
+            texts: JSON.parse(localStorage.getItem("suporteApp_texts") || "[]"),
+            notepad: localStorage.getItem("suporteApp_notepad") || "",
+          },
+        };
+
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(backup, null, 2));
+        const downloadAnchorNode = document.createElement("a");
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute(
+          "download",
+          "suporteapp_backup_completo.json",
+        );
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      }
+
+      function importFullConfig(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const backup = JSON.parse(e.target.result);
+            if (!backup.settings || !backup.data)
+              throw new Error("Arquivo de backup inválido");
+
+            // Restore settings
+            if (backup.settings.theme)
+              localStorage.setItem(
+                "suporteApp_theme",
+                JSON.stringify(backup.settings.theme),
+              );
+            if (backup.settings.jsonUrl)
+              localStorage.setItem(
+                "suporteApp_jsonUrl",
+                backup.settings.jsonUrl,
+              );
+            if (backup.settings.ports)
+              localStorage.setItem(
+                "suporteApp_ports",
+                JSON.stringify(backup.settings.ports),
+              );
+
+            // Restore data
+            if (backup.data.texts)
+              localStorage.setItem(
+                "suporteApp_texts",
+                JSON.stringify(backup.data.texts),
+              );
+            if (backup.data.notepad)
+              localStorage.setItem("suporteApp_notepad", backup.data.notepad);
+
+            showToast("Backup restaurado! Recarregando...");
+            setTimeout(() => location.reload(), 1500);
+          } catch (err) {
+            showToast("Erro: " + err.message, true);
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function exportJson() {
+        if (!allTexts.length) return showToast("Nada para exportar", true);
+
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(allTexts, null, 2));
+        const downloadAnchorNode = document.createElement("a");
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "meus_textos.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      }
+
+      function importJson(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const content = JSON.parse(e.target.result);
+            if (!Array.isArray(content))
+              throw new Error("Formato inválido (deve ser lista)");
+
+            // Basic validation
+            localStorage.setItem("suporteApp_texts", JSON.stringify(content));
+            showToast("Importado com sucesso! Recarregando...");
+            setTimeout(() => location.reload(), 1000);
+          } catch (err) {
+            showToast("Erro no arquivo: " + err.message, true);
+          }
+        };
+        reader.readAsText(file);
+      }
+      function clearLocalData() {
+        if (
+          confirm(
+            "Tem certeza? Isso apagará seus textos e configurações salvas localmente.",
+          )
+        ) {
+          localStorage.removeItem("suporteApp_texts");
+          localStorage.removeItem("suporteApp_jsonUrl");
+          localStorage.removeItem("suporteApp_theme");
+          localStorage.removeItem("suporteApp_notepad");
+          location.reload();
+        }
+      }
+
+      // --- Text Editing Logic ---
+      function openEditModal(index) {
+        const modal = document.getElementById("edit-modal");
+        const title = document.getElementById("edit-modal-title");
+        const idxInput = document.getElementById("edit-index");
+        const labelInput = document.getElementById("edit-label");
+        const textInput = document.getElementById("edit-text");
+        const catInput = document.getElementById("edit-category");
+        const delBtn = document.getElementById("btn-delete");
+        const suggestions = document.getElementById("category-suggestions");
+
+        // Populate category suggestions
+        suggestions.innerHTML = "";
+        categories.forEach((cat) => {
+          if (cat !== "Todas") {
+            const opt = document.createElement("option");
+            opt.value = cat;
+            suggestions.appendChild(opt);
+          }
+        });
+
+        idxInput.value = index;
+
+        if (index === -1) {
+          // New Text
+          title.innerText = "Novo Texto";
+          labelInput.value = "";
+          textInput.value = "";
+          catInput.value =
+            currentCategory === "Todas" ? "Geral" : currentCategory;
+          delBtn.style.display = "none";
+        } else {
+          // Edit existing
+          const item = allTexts[index];
+          title.innerText = "Editar Texto";
+          labelInput.value = item.label;
+          textInput.value = item.text;
+          catInput.value = item.category;
+          delBtn.style.display = "block";
+        }
+
+        modal.classList.add("active");
+      }
+
+      function closeEditModal() {
+        document.getElementById("edit-modal").classList.remove("active");
+      }
+
+      function saveText() {
+        const index = parseInt(document.getElementById("edit-index").value);
+        const label = document.getElementById("edit-label").value.trim();
+        const text = document.getElementById("edit-text").value.trim();
+        const category =
+          document.getElementById("edit-category").value.trim() || "Geral";
+
+        if (!label || !text) return showToast("Preencha rótulo e texto!", true);
+
+        const newItem = { text, label, category };
+
+        if (index === -1) {
+          allTexts.push(newItem);
+          showToast("Texto criado!");
+        } else {
+          allTexts[index] = newItem;
+          showToast("Texto atualizado!");
+        }
+
+        saveLocalTexts();
+
+        // Re-process categories and render
+        const oldCat = currentCategory;
+        processData(allTexts);
+
+        // Try to keep user on same category if possible, else go to new item's category
+        if (categories.has(oldCat)) {
+          filterCategory(oldCat);
+        } else {
+          filterCategory(category);
+        }
+
+        closeEditModal();
+      }
+
+      function deleteText() {
+        const index = parseInt(document.getElementById("edit-index").value);
+        if (
+          index > -1 &&
+          confirm("Tem certeza que deseja excluir este texto?")
+        ) {
+          allTexts.splice(index, 1);
+          saveLocalTexts();
+          processData(allTexts);
+          filterCategory(currentCategory); // Refresh view
+          closeEditModal();
+          showToast("Texto removido.");
+        }
+      }
+      function openAppPopup() {
+        // Default dimensions (Wide as per user image)
+        let width = 1000;
+        let height = 500;
+        let left = (screen.width - width) / 2;
+        let top = (screen.height - height) / 2;
+
+        // Restore saved dimensions
+        const savedDims = JSON.parse(
+          localStorage.getItem("suporteApp_popupDims"),
+        );
+        if (savedDims) {
+          width = savedDims.width;
+          height = savedDims.height;
+          left = savedDims.left;
+          top = savedDims.top;
+        }
+
+        // Append ?mode=popup to current URL
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set("mode", "popup");
+
+        window.open(
+          currentUrl.toString(),
+          "SuporteAppWebPopup",
+          `width=${width},height=${height},top=${top},left=${left},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`,
+        );
+      }
+    </script>
+  </body>
+</html>
