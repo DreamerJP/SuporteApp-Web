@@ -1149,29 +1149,36 @@
       // --- IP Opener ---
       // --- IP Opener (Input Based) ---
       function handlePaste(e, inputId) {
+        console.log("Passe detectado no ID:", inputId);
         const text = (e.clipboardData || window.clipboardData).getData("text");
         if (text) {
           const input = document.getElementById(inputId);
           input.value = text.trim();
-          // Use timeout to ensure the value is set and seen by the next function
-          setTimeout(() => openIpFromInput(inputId), 10);
-          e.preventDefault();
+          console.log("Texto colado e inserido:", input.value);
+
+          e.preventDefault(); // Evita texto duplicado
+          e.stopPropagation(); // Evita interferência de extensões
+
+          // Chama imediatamente para manter o 'vínculo' com o clique/gesto do usuário
+          openIpFromInput(inputId);
         }
       }
 
       function openIpFromInput(inputId = "ip-input") {
         const input = document.getElementById(inputId);
         const text = input.value;
+        console.log("Tentando abrir IP do campo:", inputId, "Conteúdo:", text);
+
         if (!text) return;
 
         try {
-          // More flexible regex: search for IP anywhere in the text
           const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/;
           const match = text.match(ipPattern);
 
           if (match) {
             const ip = match[1];
-            showToast(`Processando IP: ${ip}...`);
+            showToast(`Abrindo IP: ${ip}...`);
+            console.log("IP Encontrado:", ip);
             let openedCount = 0;
 
             const urlsToOpen = [];
@@ -1185,23 +1192,35 @@
               }
             });
 
+            console.log("URLs a abrir:", urlsToOpen);
+
             // Execute opens
             urlsToOpen.forEach((url) => {
+              console.log("Abrindo janela para:", url);
               const win = window.open(url, "_blank");
-              if (win) openedCount++;
+              if (win) {
+                openedCount++;
+              } else {
+                console.warn("Janela bloqueada para:", url);
+              }
             });
 
             if (openedCount === 0) {
-              showToast("Pop-ups bloqueados! Permita pop-ups.", true);
+              console.error("Nenhuma aba foi aberta. Pop-ups bloqueados.");
+              showToast(
+                "Pop-ups bloqueados! Verifique as permissões do navegador.",
+                true,
+              );
             } else {
-              showToast(`IP ${ip} aberto em ${openedCount} abas!`);
-              input.value = ""; // Clear after success
+              showToast(`${openedCount} abas abertas para o IP ${ip}`);
+              input.value = "";
             }
           } else {
-            showToast("IP inválido digitado.", true);
+            console.warn("Nenhum padrão de IP encontrado no texto colado.");
+            // No toast here to avoid annoying the user if they paste something else
           }
         } catch (err) {
-          console.error(err);
+          console.error("Erro ao processar IP:", err);
           showToast("Erro ao processar IP.", true);
         }
       }
