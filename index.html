@@ -653,8 +653,8 @@
             type="text"
             id="ip-input"
             placeholder="Cole o IP para abrir..."
-            onkeypress="checkIpEnter(event)"
-            onpaste="setTimeout(openIpFromInput, 100, 'ip-input')"
+            onkeypress="if (event.key === 'Enter') openIpFromInput('ip-input');"
+            onpaste="handlePaste(event, 'ip-input')"
           />
         </div>
         <button onclick="toggleNotepad()">
@@ -687,7 +687,7 @@
             onkeypress="
               if (event.key === 'Enter') openIpFromInput('ip-input-popup');
             "
-            onpaste="setTimeout(openIpFromInput, 100, 'ip-input-popup')"
+            onpaste="handlePaste(event, 'ip-input-popup')"
           />
         </div>
       </div>
@@ -1148,8 +1148,14 @@
 
       // --- IP Opener ---
       // --- IP Opener (Input Based) ---
-      function checkIpEnter(e) {
-        if (e.key === "Enter") openIpFromInput();
+      function handlePaste(e, inputId) {
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        if (text) {
+          const input = document.getElementById(inputId);
+          input.value = text; // Fill manually
+          openIpFromInput(inputId); // Process
+          e.preventDefault(); // Stop default paste to avoid double text
+        }
       }
 
       function openIpFromInput(inputId = "ip-input") {
