@@ -1000,6 +1000,41 @@
         notepad.addEventListener("input", () => {
           // Debounce save could be implemented here
         });
+
+        // Register Service Worker for offline support and PWA shortcuts
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then((registration) => {
+              console.log(
+                "[App] Service Worker registrado com sucesso:",
+                registration.scope,
+              );
+
+              // Check for updates
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    console.log(
+                      "[App] Nova versão disponível! Recarregue a página.",
+                    );
+                    // Optional: Show a toast to user about update
+                    showToast(
+                      "Nova versão disponível! Recarregue a página.",
+                      false,
+                    );
+                  }
+                });
+              });
+            })
+            .catch((error) => {
+              console.warn("[App] Falha ao registrar Service Worker:", error);
+            });
+        }
       });
 
       // --- Data Loading ---

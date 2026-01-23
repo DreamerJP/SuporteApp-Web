@@ -32,5 +32,9 @@
       "url": "./index.html?mode=popup",
       "description": "Abrir o app diretamente no modo compacto"
     }
-  ]
+  ],
+  "serviceworker": {
+    "src": "./sw.js",
+    "scope": "./"
+  }
 }
