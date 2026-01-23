@@ -1,4 +1,4 @@
-# SuporteApp Web 🚀
+# SuporteApp Web
 
 **SuporteApp Web** é a evolução da ferramenta de auxílio ao suporte técnico, agora rodando diretamente no navegador. Com um design moderno em _Glassmorphism_, ele permite gerenciar scripts de texto, abrir conexões de rede e organizar o fluxo de atendimento de forma rápida e eficiente.
 
