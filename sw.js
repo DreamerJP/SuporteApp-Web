@@ -1,12 +1,13 @@
 // SuporteApp Web - Service Worker
-// Versão 3.7.4
+// Versão 3.7.5
 
-const CACHE_NAME = "suporteapp-v3.7.4";
+const CACHE_NAME = "suporteapp-v3.7.5";
 const urlsToCache = [
   "./",
   "./index.html",
   "./manifest.json",
   "./assets/SuporteApp-Assets/favicon.png",
+  "./assets/SuporteApp-Assets/favicon.ico",
   "./texts.json",
 ];
 

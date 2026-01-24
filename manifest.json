@@ -1,5 +1,5 @@
 {
-  "name": "SuporteApp Web 3.7",
+  "name": "SuporteApp Web 3.7.5",
   "short_name": "SuporteApp",
   "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
   "id": "./",
@@ -13,7 +13,7 @@
   "icons": [
     {
       "src": "assets/SuporteApp-Assets/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "16x16 32x48 64x64",
       "type": "image/x-icon"
     },
     {
