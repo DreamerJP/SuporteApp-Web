@@ -881,6 +881,8 @@
           boost: new Audio("assets/SnakeAssets/Audio/boost.mp3"),
           gameover: new Audio("assets/SnakeAssets/Audio/gameover.mp3"),
           victory: new Audio("assets/SnakeAssets/Audio/victory.mp3"),
+          start: new Audio("assets/SnakeAssets/Audio/start.mp3"),
+          select: new Audio("assets/SnakeAssets/Audio/select.mp3"),
         },
       };
 
@@ -916,6 +918,7 @@
       function selectSkin(index) {
         Game.selectedSkinIndex = index;
         localStorage.setItem("snake_selected_skin", index);
+        playSfx("select");
         updateSkinUI();
       }
 
@@ -1380,6 +1383,7 @@
       function startGame() {
         document.getElementById("start-screen-overlay").style.display = "none";
         document.getElementById("game-over-overlay").style.display = "none";
+        playSfx("start");
         Game.isPlaying = true;
         Game.init();
       }
