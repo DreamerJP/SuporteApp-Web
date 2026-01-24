@@ -2,7 +2,8 @@
   "name": "SuporteApp Web 3.7",
   "short_name": "SuporteApp",
   "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
-  "start_url": "./index.html",
+  "id": "/SuporteApp-Web/",
+  "start_url": "../../index.html",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#1a1a2e",
@@ -11,33 +12,57 @@
   "lang": "pt-BR",
   "icons": [
     {
-      "src": "assets/SuporteApp-Assets/favicon.png?v=2",
-      "sizes": "192x192",
+      "src": "favicon.png",
+      "sizes": "72x72",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/SuporteApp-Assets/favicon.png?v=2",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png?v=2",
-      "sizes": "512x512",
+      "src": "favicon.png",
+      "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/SuporteApp-Assets/favicon.png?v=2",
+      "src": "favicon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "assets/SuporteApp-Assets/favicon.png",
+      "src": "favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
@@ -47,8 +72,12 @@
   "shortcuts": [
     {
       "name": "Abrir no modo compacto",
-      "url": "./index.html?mode=popup",
+      "url": "../../index.html?mode=popup",
       "description": "Abrir o app diretamente no modo compacto"
     }
-  ]
+  ],
+  "serviceworker": {
+    "src": "../../sw.js",
+    "scope": "../../"
+  }
 }

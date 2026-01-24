@@ -5,7 +5,7 @@ const CACHE_NAME = "suporteapp-v3.7.4";
 const urlsToCache = [
   "./",
   "./index.html",
-  "./manifest.json",
+  "./assets/SuporteApp-Assets/manifest.json",
   "./assets/SuporteApp-Assets/favicon.png",
   "./texts.json",
 ];
