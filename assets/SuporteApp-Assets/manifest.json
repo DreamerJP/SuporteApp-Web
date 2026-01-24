@@ -2,6 +2,7 @@
   "name": "SuporteApp Web 3.7",
   "short_name": "SuporteApp",
   "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
+  "id": "/SuporteApp-Web/",
   "start_url": "../../index.html",
   "display": "standalone",
   "orientation": "any",
@@ -12,7 +13,43 @@
   "icons": [
     {
       "src": "favicon.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -20,7 +57,7 @@
       "src": "favicon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
