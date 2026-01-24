@@ -447,8 +447,8 @@
 
     <script>
       const CONFIG = {
-        gridSize: 30, // Aumentado para planetas maiores
-        cols: 20, // Grid fixo (20x20)
+        gridSize: 30,
+        cols: 20,
         rows: 20,
         starCount: 200,
         baseSpeed: 100,
@@ -503,7 +503,6 @@
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
 
-        // Calcula as dimensões e posição do board centralizado
         boardW = CONFIG.cols * CONFIG.gridSize;
         boardH = CONFIG.rows * CONFIG.gridSize;
         boardX = (width - boardW) / 2;
@@ -521,8 +520,8 @@
         controlsHint.style.left = "auto";
 
         const boostContainer = document.getElementById("boost-container");
-        boostContainer.style.right = `${width - (boardX + boardW) - 150}px`; // Alinhado com as dicas
-        boostContainer.style.top = `${boardY + boardH / 2 + 30}px`; // Abaixo das dicas
+        boostContainer.style.right = `${width - (boardX + boardW) - 150}px`;
+        boostContainer.style.top = `${boardY + boardH / 2 + 30}px`;
         boostContainer.style.left = "auto";
         boostContainer.style.justifyContent = "center";
       }
@@ -608,30 +607,59 @@
 
       class Planet {
         constructor(x, y, type) {
-          this.x = x; // Grid X (0 a cols-1)
-          this.y = y; // Grid Y (0 a rows-1)
+          this.x = x;
+          this.y = y;
           this.type = type;
           this.radius = CONFIG.gridSize / 2 - 2;
           this.rotation = Math.random() * Math.PI * 2;
-          this.rotationSpeed = 0.02 + Math.random() * 0.03;
-          this.pulse = Math.random() * Math.PI * 2; // Offset inicial de animação
+          this.rotationSpeed = 0.005 + Math.random() * 0.01;
+          this.pulse = Math.random() * Math.PI * 2;
         }
         update() {
           this.rotation += this.rotationSpeed;
-          this.pulse += 0.05; // Velocidade do pulsar
+          this.pulse += 0.03;
         }
         draw(ctx) {
           ctx.save();
-          // Converte grid para coordenadas de tela relativas ao board
           const screenX =
             boardX + this.x * CONFIG.gridSize + CONFIG.gridSize / 2;
           const screenY =
             boardY + this.y * CONFIG.gridSize + CONFIG.gridSize / 2;
 
-          ctx.translate(screenX, screenY);
+          const bobX = Math.cos(this.pulse) * 2;
+          const bobY = Math.sin(this.pulse) * 2;
+
+          ctx.translate(screenX + bobX, screenY + bobY);
+
+          const haloSize = this.radius * 2.5;
+          const gradientHalo = ctx.createRadialGradient(
+            0,
+            0,
+            0,
+            0,
+            0,
+            haloSize,
+          );
+          const colors = [
+            "rgba(0, 150, 255, 0.3)",
+            "rgba(255, 100, 0, 0.3)",
+            "rgba(100, 255, 150, 0.3)",
+            "rgba(200, 150, 255, 0.3)",
+          ];
+          gradientHalo.addColorStop(0, colors[this.type % 4]);
+          gradientHalo.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+          ctx.globalCompositeOperation = "screen";
+          ctx.fillStyle = gradientHalo;
+          ctx.beginPath();
+          ctx.arc(0, 0, haloSize, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Reset composite operation
+          ctx.globalCompositeOperation = "source-over";
+
           ctx.rotate(this.rotation);
 
-          // Efeito de pulsar no tamanho
           const pulseScale = 1 + Math.sin(this.pulse) * 0.05;
           ctx.scale(pulseScale, pulseScale);
 
@@ -640,15 +668,22 @@
             const size = this.radius * 3.2;
             ctx.drawImage(planetImg, -size / 2, -size / 2, size, size);
 
-            ctx.globalCompositeOperation = "screen";
-            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size / 2);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0.2)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+            ctx.globalCompositeOperation = "overlay";
+            const lightGrad = ctx.createRadialGradient(
+              -size / 4,
+              -size / 4,
+              0,
+              0,
+              0,
+              size / 2,
+            );
+            lightGrad.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+            lightGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+            ctx.fillStyle = lightGrad;
+            ctx.arc(0, 0, size / 2.1, 0, Math.PI * 2);
             ctx.fill();
           } else {
+            // Fallback elegante caso a imagem falhe
             const gradient = ctx.createRadialGradient(
               -5,
               -5,
@@ -701,7 +736,6 @@
           }
         }
         draw(ctx) {
-          // Efeito de piscar nos últimos 3 segundos
           if (this.lifetime < 3000 && Math.floor(Date.now() / 100) % 2 === 0)
             return;
 
@@ -716,7 +750,6 @@
           ctx.shadowBlur = 20;
 
           if (this.type === "speed") {
-            // Desenha um Raio/Bolt para Velocidade
             ctx.fillStyle = "#00ffff";
             ctx.shadowColor = "#00ffff";
             ctx.beginPath();
@@ -729,7 +762,6 @@
             ctx.closePath();
             ctx.fill();
           } else if (this.type === "immortal") {
-            // Desenha uma Estrela para Imortalidade
             ctx.fillStyle = "#ffd700";
             ctx.shadowColor = "#ffd700";
             ctx.rotate(this.pulse * 0.5);
@@ -747,14 +779,13 @@
             ctx.closePath();
             ctx.fill();
           } else {
-            // Cristal de Pontos (Diamante Espacial)
             ctx.fillStyle = "#ff00ff";
             ctx.shadowColor = "#ff00ff";
             ctx.beginPath();
-            ctx.moveTo(0, -10); // Topo
-            ctx.lineTo(8, 0); // Direita
-            ctx.lineTo(0, 10); // Baixo
-            ctx.lineTo(-8, 0); // Esquerda
+            ctx.moveTo(0, -10);
+            ctx.lineTo(8, 0);
+            ctx.lineTo(0, 10);
+            ctx.lineTo(-8, 0);
             ctx.closePath();
             ctx.fill();
 
@@ -789,7 +820,6 @@
         assets.isLoaded = true;
       };
 
-      // Carrega as texturas dos planetas
       assets.planets.forEach((img, i) => {
         img.src = `assets/SnakeAssets/Imagens/planet_${i}.png`;
       });
@@ -800,13 +830,12 @@
         document.getElementById("mute-btn").innerText = isMuted ? "🔇" : "🔊";
       }
 
-      // Função auxiliar para tocar áudio com segurança
       function playSfx(key) {
         if (isMuted) return;
         const sound = assets.audio[key];
         if (sound) {
-          sound.currentTime = 0; // Reinicia se já estiver tocando
-          sound.play().catch(() => {}); // Oculta erros de política de som do navegador
+          sound.currentTime = 0;
+          sound.play().catch(() => {});
         }
       }
 
@@ -832,6 +861,7 @@
             { x: 9, y: 10 },
             { x: 8, y: 10 },
           ];
+          this.prevSnake = this.snake.map((s) => ({ ...s }));
           this.direction = { x: 1, y: 0 };
           this.nextDirection = { x: 1, y: 0 };
           this.score = 0;
@@ -888,7 +918,6 @@
             this.boosts.forEach((b) => b.update(deltaTime));
             this.particles.forEach((p) => p.update());
 
-            // Remove mortos/expirados
             this.boosts = this.boosts.filter((b) => b.lifetime > 0);
             this.particles = this.particles.filter((p) => p.alpha > 0);
           }
@@ -927,6 +956,7 @@
         },
 
         move() {
+          this.prevSnake = this.snake.map((s) => ({ ...s }));
           this.direction = this.nextDirection;
           const head = {
             x: this.snake[0].x + this.direction.x,
@@ -983,7 +1013,6 @@
           this.snake.unshift(head);
           if (!ate) this.snake.pop();
 
-          // Condição de Vitória (Zerar o jogo)
           if (this.snake.length >= CONFIG.cols * CONFIG.rows) {
             this.victory();
             return;
@@ -1008,103 +1037,217 @@
           this.planets.forEach((p) => p.draw(ctx));
           this.boosts.forEach((b) => b.draw(ctx));
           this.particles.forEach((p) => p.draw(ctx));
+
+          if (this.snake.length === 0) return;
+
           ctx.save();
           let glowColor = CONFIG.colors.snakeGlow;
           if (this.activeBoosts.immortal > 0) {
-            glowColor = "rgba(255, 215, 0, 0.6)";
-            ctx.shadowBlur = 20;
+            glowColor = "rgba(255, 215, 0, 0.7)";
+            ctx.shadowBlur = 25;
           } else if (this.activeBoosts.speed > 0) {
-            glowColor = "rgba(0, 170, 255, 0.6)";
-            ctx.shadowBlur = 15;
+            glowColor = "rgba(0, 255, 255, 0.7)";
+            ctx.shadowBlur = 20;
           } else {
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 15;
           }
           ctx.shadowColor = glowColor;
 
-          // Desenha da cauda para a cabeça para que a cabeça fique sempre por cima
-          for (let i = this.snake.length - 1; i >= 0; i--) {
-            const segment = this.snake[i];
-            const index = i;
+          const progress = this.isPlaying
+            ? Math.min(this.timeSinceLastMove / this.moveInterval, 1)
+            : 0;
 
-            const px =
-              boardX + segment.x * CONFIG.gridSize + CONFIG.gridSize / 2;
-            const py =
-              boardY + segment.y * CONFIG.gridSize + CONFIG.gridSize / 2;
+          const getInterpolatedPos = (index) => {
+            const curr = this.snake[index];
+            const prev = this.prevSnake[index] || curr;
 
-            // Tamanho unificado para evitar que qualquer parte pareça maior
-            let sW = CONFIG.gridSize * 1.5; // Um pouco maior que o grid para ficar "gorda"
-            let sH = CONFIG.gridSize * 1.5;
-            let rotation = 0;
-            let sx = 0,
-              sy = 0,
-              sw = 0,
-              sh = 0;
-            const imgW = assets.snake.naturalWidth;
-            const imgH = assets.snake.naturalHeight;
+            let px = prev.x;
+            let py = prev.y;
+            let cx = curr.x;
+            let cy = curr.y;
 
-            if (index === 0) {
-              // Cabeça: Recorte focado apenas no topo
-              sx = 0;
-              sy = 0;
-              sw = imgW;
-              sh = imgH * 0.15;
+            if (Math.abs(cx - px) > 1) {
+              if (cx > px) px += CONFIG.cols;
+              else cx += CONFIG.cols;
+            }
+            if (Math.abs(cy - py) > 1) {
+              if (cy > py) py += CONFIG.rows;
+              else cy += CONFIG.rows;
+            }
 
-              if (this.direction.x === 1) rotation = Math.PI / 2;
-              else if (this.direction.x === -1) rotation = -Math.PI / 2;
-              else if (this.direction.y === 1) rotation = Math.PI;
-              else if (this.direction.y === -1) rotation = 0;
+            const interX = px + (cx - px) * progress;
+            const interY = py + (cy - py) * progress;
+
+            return {
+              x: boardX + interX * CONFIG.gridSize + CONFIG.gridSize / 2,
+              y: boardY + interY * CONFIG.gridSize + CONFIG.gridSize / 2,
+            };
+          };
+
+          const points = this.snake.map((_, i) => getInterpolatedPos(i));
+
+          if (points.length > 1) {
+            const bodyImg = assets.snake;
+            const imgW = bodyImg.naturalWidth;
+            const imgH = bodyImg.naturalHeight;
+            const sxBody = 0,
+              syBody = imgH * 0.45,
+              swBody = imgW,
+              shBody = imgH * 0.1;
+
+            const hasBoost =
+              this.activeBoosts.immortal > 0 || this.activeBoosts.speed > 0;
+
+            if (hasBoost) {
+              ctx.shadowColor = glowColor;
+              ctx.shadowOffsetX = 0;
+              ctx.shadowOffsetY = 0;
+              ctx.shadowBlur = this.activeBoosts.immortal > 0 ? 30 : 25;
             } else {
-              const prev = this.snake[index - 1];
-              let dx = prev.x - segment.x;
-              let dy = prev.y - segment.y;
-              if (Math.abs(dx) > 1) dx = -Math.sign(dx) * 1;
-              if (Math.abs(dy) > 1) dy = -Math.sign(dy) * 1;
+              ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+              ctx.shadowBlur = 10;
+              ctx.shadowOffsetX = 5;
+              ctx.shadowOffsetY = 5;
+            }
 
-              if (dx === 1) rotation = Math.PI / 2;
-              else if (dx === -1) rotation = -Math.PI / 2;
-              else if (dy === 1) rotation = Math.PI;
-              else if (dy === -1) rotation = 0;
+            for (let i = 1; i < points.length - 1; i++) {
+              const p = points[i];
+              const prevP = points[i - 1];
+              const nextP = points[i + 1];
 
-              if (index === this.snake.length - 1) {
-                // Cauda: Base da imagem
+              const distPrev = Math.hypot(p.x - prevP.x, p.y - prevP.y);
+              const distNext = Math.hypot(nextP.x - p.x, nextP.y - p.y);
+
+              let rotation;
+              if (
+                distPrev < CONFIG.gridSize * 2 &&
+                distNext < CONFIG.gridSize * 2
+              ) {
+                const anglePrev = Math.atan2(p.y - prevP.y, p.x - prevP.x);
+                const angleNext = Math.atan2(nextP.y - p.y, nextP.x - p.x);
+                let diff = angleNext - anglePrev;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                rotation = anglePrev + diff * 0.5 + Math.PI / 2;
+              } else {
+                rotation =
+                  Math.atan2(nextP.y - p.y, nextP.x - p.x) + Math.PI / 2;
+              }
+
+              const taperFactor = 1 - (i / points.length) * 0.4;
+              const pulse = 1 + Math.sin(Date.now() / 200 + i * 0.3) * 0.05;
+              const currentSize = CONFIG.gridSize * 1.5 * taperFactor * pulse;
+
+              ctx.save();
+              ctx.translate(p.x, p.y);
+              ctx.rotate(rotation);
+
+              if (assets.isLoaded) {
+                ctx.drawImage(
+                  bodyImg,
+                  sxBody,
+                  syBody,
+                  swBody,
+                  shBody,
+                  -currentSize / 2,
+                  -currentSize / 2,
+                  currentSize,
+                  currentSize,
+                );
+              } else {
+                ctx.fillStyle = CONFIG.colors.snakeBody;
+                ctx.beginPath();
+                ctx.arc(0, 0, currentSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              ctx.restore();
+            }
+          }
+
+          // Reseta sombras
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+
+          points.forEach((p, index) => {
+            if (index !== 0 && index !== points.length - 1) return;
+
+            let rotation = 0;
+            if (index === 0) {
+              const targetRotation =
+                this.direction.x === 1
+                  ? Math.PI / 2
+                  : this.direction.x === -1
+                    ? -Math.PI / 2
+                    : this.direction.y === 1
+                      ? Math.PI
+                      : 0;
+
+              if (points.length > 1) {
+                const nextP = points[1];
+                let dx = p.x - nextP.x;
+                let dy = p.y - nextP.y;
+
+                if (Math.abs(dx) > CONFIG.gridSize * 2) dx = 0;
+                if (Math.abs(dy) > CONFIG.gridSize * 2) dy = 0;
+
+                rotation = Math.atan2(dy, dx) + Math.PI / 2;
+              } else {
+                rotation = targetRotation;
+              }
+            } else {
+              const pPrev = points[index - 1];
+              let dx = pPrev.x - p.x;
+              let dy = pPrev.y - p.y;
+              if (Math.abs(dx) > CONFIG.gridSize * 2) dx = 0;
+              if (Math.abs(dy) > CONFIG.gridSize * 2) dy = 0;
+              rotation = Math.atan2(dy, dx) + Math.PI / 2;
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(rotation);
+
+            const taperFactor = index === 0 ? 1 : 0.6;
+            const sSize = CONFIG.gridSize * 1.6 * taperFactor;
+
+            if (assets.isLoaded) {
+              const imgW = assets.snake.naturalWidth;
+              const imgH = assets.snake.naturalHeight;
+              let sx, sy, sw, sh;
+
+              if (index === 0) {
+                sx = 0;
+                sy = 0;
+                sw = imgW;
+                sh = imgH * 0.15;
+              } else {
                 sx = 0;
                 sy = imgH * 0.85;
                 sw = imgW;
                 sh = imgH * 0.15;
-              } else {
-                // Corpo: Fatia central
-                sx = 0;
-                sy = imgH * 0.45;
-                sw = imgW;
-                sh = imgH * 0.1;
               }
-            }
 
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(rotation);
-
-            if (assets.isLoaded) {
               ctx.drawImage(
                 assets.snake,
                 sx,
                 sy,
                 sw,
                 sh,
-                -sW / 2,
-                -sH / 2,
-                sW,
-                sH,
+                -sSize / 2,
+                -sSize / 2,
+                sSize,
+                sSize,
               );
             } else {
               ctx.fillStyle =
                 index === 0 ? CONFIG.colors.snakeHead : CONFIG.colors.snakeBody;
               ctx.beginPath();
-              ctx.arc(0, 0, CONFIG.gridSize / 2 - 2, 0, Math.PI * 2);
+              ctx.arc(0, 0, sSize / 2, 0, Math.PI * 2);
               ctx.fill();
             }
             ctx.restore();
-          }
+          });
+
           ctx.restore();
         },
 
@@ -1222,7 +1365,6 @@
         const deltaTime = timestamp - lastTime || 0;
         lastTime = timestamp;
 
-        // Cálculo de FPS
         frameCount++;
         if (timestamp - fpsLastTime >= 1000) {
           currentFps = frameCount;
