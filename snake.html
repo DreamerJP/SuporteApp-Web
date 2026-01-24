@@ -15,7 +15,7 @@
         margin: 0;
         overflow: hidden;
         background-color: #050510;
-        background-image: url("assets/Imagens/background.jpg");
+        background-image: url("assets/SnakeAssets/Imagens/background.jpg");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -777,21 +777,21 @@
         planets: [new Image(), new Image(), new Image(), new Image()],
         isLoaded: false,
         audio: {
-          eat: new Audio("assets/Audio/eat.mp3"),
-          boost: new Audio("assets/Audio/boost.mp3"),
-          gameover: new Audio("assets/Audio/gameover.mp3"),
-          victory: new Audio("assets/Audio/victory.mp3"),
+          eat: new Audio("assets/SnakeAssets/Audio/eat.mp3"),
+          boost: new Audio("assets/SnakeAssets/Audio/boost.mp3"),
+          gameover: new Audio("assets/SnakeAssets/Audio/gameover.mp3"),
+          victory: new Audio("assets/SnakeAssets/Audio/victory.mp3"),
         },
       };
 
-      assets.snake.src = "assets/Imagens/Snake.PNG";
+      assets.snake.src = "assets/SnakeAssets/Imagens/Snake.PNG";
       assets.snake.onload = () => {
         assets.isLoaded = true;
       };
 
       // Carrega as texturas dos planetas
       assets.planets.forEach((img, i) => {
-        img.src = `assets/Imagens/planet_${i}.png`;
+        img.src = `assets/SnakeAssets/Imagens/planet_${i}.png`;
       });
 
       let isMuted = false;
