@@ -307,6 +307,55 @@
         color: rgba(255, 255, 255, 0.3);
         text-align: right;
       }
+
+      /* Skin Selector */
+      .skin-selector {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 25px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+      }
+      .skin-option {
+        width: 60px;
+        height: 60px;
+        border: 2px solid rgba(0, 255, 204, 0.3);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+      }
+      .skin-option:hover {
+        border-color: rgba(0, 255, 204, 0.8);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 255, 204, 0.2);
+      }
+      .skin-option.active {
+        border-color: #00ffcc;
+        background: rgba(0, 255, 204, 0.1);
+        box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+      }
+      .skin-option img {
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        transform: scale(2.5) rotate(-45deg);
+      }
+      .skin-label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 10px;
+        color: #00ffcc;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0.8;
+      }
     </style>
   </head>
   <body>
@@ -371,6 +420,11 @@
         <div class="subtitle">DEEP SPACE</div>
         <h1 class="glitch">COSMIC SNAKE</h1>
         <p class="slogan">Domine o vácuo. Consuma os mundos.</p>
+
+        <div class="skin-label">Select your vessel</div>
+        <div class="skin-selector" id="skin-selector">
+          <!-- Options added via JS -->
+        </div>
 
         <button class="btn" onclick="startGame()">INITIATE MISSION</button>
         <button
@@ -645,8 +699,11 @@
             "rgba(255, 100, 0, 0.3)",
             "rgba(100, 255, 150, 0.3)",
             "rgba(200, 150, 255, 0.3)",
+            "rgba(255, 200, 0, 0.3)",
+            "rgba(0, 255, 255, 0.3)",
+            "rgba(255, 0, 255, 0.3)",
           ];
-          gradientHalo.addColorStop(0, colors[this.type % 4]);
+          gradientHalo.addColorStop(0, colors[this.type % colors.length]);
           gradientHalo.addColorStop(1, "rgba(0, 0, 0, 0)");
 
           ctx.globalCompositeOperation = "screen";
@@ -708,6 +765,18 @@
               case 3:
                 gradient.addColorStop(0, "#ddaa88");
                 gradient.addColorStop(1, "#553311");
+                break;
+              case 4:
+                gradient.addColorStop(0, "#ffffaa");
+                gradient.addColorStop(1, "#888800");
+                break;
+              case 5:
+                gradient.addColorStop(0, "#aaffff");
+                gradient.addColorStop(1, "#008888");
+                break;
+              case 6:
+                gradient.addColorStop(0, "#ffaaff");
+                gradient.addColorStop(1, "#880088");
                 break;
             }
             ctx.fillStyle = gradient;
@@ -804,8 +873,8 @@
       }
 
       const assets = {
-        snake: new Image(),
-        planets: [new Image(), new Image(), new Image(), new Image()],
+        skins: Array.from({ length: 5 }, () => new Image()),
+        planets: Array.from({ length: 7 }, () => new Image()),
         isLoaded: false,
         audio: {
           eat: new Audio("assets/SnakeAssets/Audio/eat.mp3"),
@@ -815,14 +884,40 @@
         },
       };
 
-      assets.snake.src = "assets/SnakeAssets/Imagens/Snake.PNG";
-      assets.snake.onload = () => {
-        assets.isLoaded = true;
-      };
+      assets.skins.forEach((img, i) => {
+        const name = i === 0 ? "Snake" : `Snake${i}`;
+        img.src = `assets/SnakeAssets/Imagens/${name}.PNG`;
+        img.onload = () => {
+          if (i === 0) assets.isLoaded = true;
+          updateSkinUI();
+        };
+      });
 
       assets.planets.forEach((img, i) => {
         img.src = `assets/SnakeAssets/Imagens/planet_${i}.png`;
       });
+
+      function updateSkinUI() {
+        const container = document.getElementById("skin-selector");
+        if (!container) return;
+        container.innerHTML = "";
+        assets.skins.forEach((skin, i) => {
+          const div = document.createElement("div");
+          div.className = `skin-option ${Game.selectedSkinIndex === i ? "active" : ""}`;
+          div.onclick = () => selectSkin(i);
+
+          const img = document.createElement("img");
+          img.src = skin.src;
+          div.appendChild(img);
+          container.appendChild(div);
+        });
+      }
+
+      function selectSkin(index) {
+        Game.selectedSkinIndex = index;
+        localStorage.setItem("snake_selected_skin", index);
+        updateSkinUI();
+      }
 
       let isMuted = false;
       function toggleMute() {
@@ -854,6 +949,8 @@
         timeSinceLastMove: 0,
         moveInterval: CONFIG.baseSpeed,
         activeBoosts: { speed: 0, immortal: 0 },
+        selectedSkinIndex:
+          parseInt(localStorage.getItem("snake_selected_skin")) || 0,
 
         init() {
           this.snake = [
@@ -892,7 +989,13 @@
             attempts++;
           } while (!valid && attempts < 100);
           if (valid)
-            this.planets.push(new Planet(x, y, Math.floor(Math.random() * 4)));
+            this.planets.push(
+              new Planet(
+                x,
+                y,
+                Math.floor(Math.random() * assets.planets.length),
+              ),
+            );
         },
 
         spawnBoost() {
@@ -1087,7 +1190,7 @@
           const points = this.snake.map((_, i) => getInterpolatedPos(i));
 
           if (points.length > 1) {
-            const bodyImg = assets.snake;
+            const bodyImg = assets.skins[this.selectedSkinIndex];
             const imgW = bodyImg.naturalWidth;
             const imgH = bodyImg.naturalHeight;
             const sxBody = 0,
@@ -1211,8 +1314,9 @@
             const sSize = CONFIG.gridSize * 1.6 * taperFactor;
 
             if (assets.isLoaded) {
-              const imgW = assets.snake.naturalWidth;
-              const imgH = assets.snake.naturalHeight;
+              const currentSkin = assets.skins[this.selectedSkinIndex];
+              const imgW = currentSkin.naturalWidth;
+              const imgH = currentSkin.naturalHeight;
               let sx, sy, sw, sh;
 
               if (index === 0) {
@@ -1228,7 +1332,7 @@
               }
 
               ctx.drawImage(
-                assets.snake,
+                currentSkin,
                 sx,
                 sy,
                 sw,
