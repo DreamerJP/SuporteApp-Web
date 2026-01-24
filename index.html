@@ -677,8 +677,37 @@
         display: none; /* Hide preview and edit button in this mode */
       }
 
-      /* Optional: A small settings trigger for Popup Mode could be added if needed, 
-         but for now it's pure usage mode as requested */
+      /* Easter Egg Modal Custom Style */
+      #easter-egg-modal .modal-content {
+        max-width: 95vw;
+        max-height: 95vh;
+        width: 1000px;
+        height: 700px;
+        padding: 0;
+        overflow: hidden;
+        border: 2px solid #00ffcc;
+        box-shadow: 0 0 50px rgba(0, 255, 204, 0.3);
+        background: #000;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #easter-egg-modal .modal-header {
+        background: rgba(0, 255, 204, 0.1);
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+      }
+
+      #easter-egg-frame {
+        width: 100%;
+        flex: 1;
+        border: none;
+      }
+
+      /* ... */
     </style>
   </head>
   <body>
@@ -1035,6 +1064,30 @@
               </div>
             </div>
           </details>
+        </div>
+      </div>
+      <!-- Easter Egg Modal -->
+      <div class="modal-overlay" id="easter-egg-modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <span
+              style="
+                font-family: &quot;Orbitron&quot;, sans-serif;
+                color: #00ffcc;
+                font-size: 0.8rem;
+                letter-spacing: 2px;
+              "
+              >SYSTEM_BREACH: COSMIC_SNAKE_DETECTED</span
+            >
+            <div
+              class="close-modal"
+              style="position: static; font-size: 1.5rem"
+              onclick="closeEasterEgg()"
+            >
+              ✕
+            </div>
+          </div>
+          <iframe id="easter-egg-frame" src=""></iframe>
         </div>
       </div>
     </main>
@@ -1897,6 +1950,48 @@
           "SuporteAppWebPopup",
           `width=${width},height=${height},top=${top},left=${left},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`,
         );
+      }
+
+      // --- EASTER EGG LOGIC (KONAMI CODE) ---
+      let konamiCode = [
+        "ArrowUp",
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowLeft",
+        "ArrowRight",
+        "b",
+        "a",
+      ];
+      let konamiPosition = 0;
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === konamiCode[konamiPosition]) {
+          konamiPosition++;
+          if (konamiPosition === konamiCode.length) {
+            openEasterEgg();
+            konamiPosition = 0;
+          }
+        } else {
+          konamiPosition = 0;
+        }
+      });
+
+      function openEasterEgg() {
+        const modal = document.getElementById("easter-egg-modal");
+        const frame = document.getElementById("easter-egg-frame");
+        frame.src = "snake.html";
+        modal.classList.add("active");
+        showToast("🌌 Conexão espacial estabelecida...");
+      }
+
+      function closeEasterEgg() {
+        const modal = document.getElementById("easter-egg-modal");
+        const frame = document.getElementById("easter-egg-frame");
+        frame.src = ""; // Stop the game audio/logic
+        modal.classList.remove("active");
       }
     </script>
   </body>
