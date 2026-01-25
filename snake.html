@@ -1098,6 +1098,8 @@
           victory: new Audio("assets/SnakeAssets/Audio/victory.mp3"),
           start: new Audio("assets/SnakeAssets/Audio/start.mp3"),
           select: new Audio("assets/SnakeAssets/Audio/select.mp3"),
+          immortal: new Audio("assets/SnakeAssets/Audio/shield.mp3"),
+          bonus: new Audio("assets/SnakeAssets/Audio/coin.mp3"),
         },
       };
 
@@ -1321,7 +1323,10 @@
                     ? "#ffd700"
                     : "#ff00ff";
               this.createExplosion(head.x, head.y, color, 25);
-              playSfx("boost");
+
+              if (b.type === "speed") playSfx("boost");
+              else if (b.type === "immortal") playSfx("immortal");
+              else playSfx("bonus");
 
               if (b.type === "speed") this.activeBoosts.speed = 5000;
               else if (b.type === "immortal")

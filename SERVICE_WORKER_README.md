@@ -20,7 +20,7 @@ O arquivo `sw.js` é um Service Worker que melhora a experiência do SuporteApp 
 Para o app funcionar completamente, você precisa ter na mesma pasta:
 
 ```
-📁 SuporteApp Web 3.7/
+📁 SuporteApp Web 3.8/
 ├── index.html          (arquivo principal)
 ├── manifest.json       (configuração do PWA)
 ├── sw.js              (Service Worker - NOVO!)
