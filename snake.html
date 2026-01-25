@@ -278,7 +278,7 @@
         margin: 20px 0;
         text-align: left;
         width: 100%;
-        max-height: 250px;
+        max-height: 170px;
         overflow-y: auto;
         padding-right: 5px;
       }
@@ -461,15 +461,222 @@
       #toast.show {
         transform: translateX(-50%) translateY(0);
       }
+
+      /* --- CONTROL OPTIONS MENU --- */
+      .control-option {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(0, 255, 204, 0.2);
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s;
+      }
+      .control-option:hover {
+        background: rgba(0, 255, 204, 0.1);
+        border-color: #00ffcc;
+      }
+      .control-option.selected {
+        border-color: #00ffcc;
+        background: rgba(0, 255, 204, 0.2);
+        box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
+      }
+      .control-icon {
+        font-size: 24px;
+        margin-right: 15px;
+      }
+      .control-info {
+        flex: 1;
+        text-align: left;
+      }
+      .control-title {
+        font-family: "Orbitron", sans-serif;
+        color: #00ffcc;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+      .control-desc {
+        font-size: 10px;
+        color: #aaa;
+      }
+
+      /* --- D-PAD COMPONENTS --- */
+      #dpad-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px; /* Default right side */
+        width: 160px;
+        height: 160px;
+        z-index: 60; /* Lower than overlays (z-index 100) but higher than game (canvas) */
+        pointer-events: none; /* Let touches pass mostly, buttons re-enable pointer-events */
+        display: none; /* Hidden by default */
+      }
+
+      /* Center D-Pad on smaller screens if desired, or keep right. 
+         Let's keep it responsive: bottom center for very narrow? 
+         Standard mobile game usually is bottom-left or bottom-right. 
+         Let's stick to bottom-center for ease of thumb reach on portrait. */
+      @media (max-width: 600px) {
+        #dpad-container {
+          right: 10px; /* Keep it on the right side */
+          transform: none; /* Remove centering transform */
+          bottom: 20px;
+        }
+      }
+
+      .dpad-btn {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 255, 204, 0.1);
+        border: 1px solid rgba(0, 255, 204, 0.4);
+        border-radius: 12px;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #00ffcc;
+        backdrop-filter: blur(4px);
+        user-select: none;
+        -webkit-user-select: none;
+        cursor: pointer;
+        transition:
+          background 0.1s,
+          transform 0.1s;
+      }
+      .dpad-btn:active {
+        background: rgba(0, 255, 204, 0.4);
+        transform: scale(0.95);
+      }
+
+      .dpad-up {
+        top: 0;
+        left: 50%;
+        margin-left: -25px;
+      }
+      .dpad-down {
+        bottom: 0;
+        left: 50%;
+        margin-left: -25px;
+      }
+      .dpad-left {
+        top: 50%;
+        left: 0;
+        margin-top: -25px;
+      }
+      .dpad-right {
+        top: 50%;
+        right: 0;
+        margin-top: -25px;
+      }
+
+      /* --- SPLIT CONTROLS (SIDE BUTTONS) --- */
+      #split-controls-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 90; /* High enough to be reachable but below overlays */
+        display: none;
+      }
+
+      .split-side {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 5px; /* Bem mais próximo */
+        pointer-events: none;
+      }
+
+      .split-side.left {
+        left: 15px;
+        align-items: flex-start;
+      }
+      .split-side.right {
+        right: 15px;
+        align-items: flex-end;
+      }
+
+      .split-btn {
+        width: 65px;
+        height: 65px;
+        background: transparent;
+        border: none;
+        color: rgba(0, 255, 204, 0.15); /* Quase fantasma */
+        /* border-radius: 50%; */ /* Removed as per instruction */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        backdrop-filter: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.2s;
+        pointer-events: auto;
+      }
+
+      .split-btn:active {
+        background: transparent;
+        transform: scale(1.1);
+        color: rgba(0, 255, 204, 0.7);
+        text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+      }
+
+      /* Layout específico das setas laterais */
+      .split-row {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
     <canvas id="gameCanvas"></canvas>
 
-    <!-- Joystick for Mobile -->
+    <!-- Joystick for Mobile (Dinâmico) -->
     <div id="joystick-container">
       <div id="joystick-base" class="joystick-base">
         <div id="joystick-stick" class="joystick-stick"></div>
+      </div>
+    </div>
+
+    <!-- D-Pad for Mobile (Botões) -->
+    <div id="dpad-container">
+      <div class="dpad-btn dpad-up" data-dir="up">▲</div>
+      <div class="dpad-btn dpad-down" data-dir="down">▼</div>
+      <div class="dpad-btn dpad-left" data-dir="left">◀</div>
+      <div class="dpad-btn dpad-right" data-dir="right">▶</div>
+    </div>
+
+    <!-- Split Controls (Side Buttons) -->
+    <div id="split-controls-container">
+      <!-- Lado Esquerdo: Cima, Baixo, Esquerda -->
+      <div class="split-side left">
+        <div class="split-btn" data-dir="up">▲</div>
+        <div class="split-row">
+          <div class="split-btn" data-dir="left">◀</div>
+          <!-- Espaço vazio ou botão duplicado? O desenho mostrava setas nas laterais.
+                     Vamos colocar Cima/Baixo verticalmente e Esquerda deslocada para dentro. -->
+        </div>
+        <div class="split-btn" data-dir="down">▼</div>
+      </div>
+
+      <!-- Lado Direito: Cima, Baixo, Direita -->
+      <div class="split-side right">
+        <div class="split-btn" data-dir="up">▲</div>
+        <div class="split-row">
+          <!-- Direita deslocada para dentro -->
+          <div class="split-btn" data-dir="right">▶</div>
+        </div>
+        <div class="split-btn" data-dir="down">▼</div>
       </div>
     </div>
 
@@ -516,12 +723,105 @@
           </div>
 
           <button class="btn" onclick="startGame()">INITIATE MISSION</button>
+
           <button
             class="btn"
-            style="border-color: rgba(0, 255, 204, 0.3); opacity: 0.8"
+            onclick="showControlsMenu()"
+            style="border-color: rgba(0, 255, 204, 0.5)"
+          >
+            CONTROLES
+          </button>
+
+          <button
+            class="btn"
+            style="
+              border-color: rgba(255, 255, 255, 0.2);
+              color: #aaa;
+              margin-top: 5px;
+            "
             onclick="showHighScoresFromMenu()"
           >
             RANKING GLOBAL
+          </button>
+        </div>
+
+        <!-- Controls Menu Section -->
+        <div id="controls-menu-content" style="display: none">
+          <div class="subtitle">CONFIGURAÇÃO DE VOO</div>
+          <h1 style="font-size: 32px; margin-bottom: 30px">CONTROLES</h1>
+
+          <div id="controls-list">
+            <!-- JOYSTICK -->
+            <div
+              class="control-option"
+              id="opt-joystick"
+              onclick="setControlMode('joystick')"
+            >
+              <div class="control-icon">🕹️</div>
+              <div class="control-info">
+                <div class="control-title">JOYSTICK DINÂMICO</div>
+                <div class="control-desc">
+                  Padrão. O controle virtual aparece onde você tocar.
+                </div>
+              </div>
+            </div>
+
+            <!-- SWIPE -->
+            <div
+              class="control-option"
+              id="opt-swipe"
+              onclick="setControlMode('swipe')"
+            >
+              <div class="control-icon">👆</div>
+              <div class="control-info">
+                <div class="control-title">SWIPE GESTURES</div>
+                <div class="control-desc">
+                  Deslize o dedo na tela para mudar de direção. Tela limpa.
+                </div>
+              </div>
+            </div>
+
+            <!-- D-PAD -->
+            <div
+              class="control-option"
+              id="opt-dpad"
+              onclick="setControlMode('dpad')"
+            >
+              <div class="control-icon">🎮</div>
+              <div class="control-info">
+                <div class="control-title">BOTÕES (D-PAD)</div>
+                <div class="control-desc">
+                  Botões fixos de direção no canto.
+                </div>
+              </div>
+            </div>
+
+            <!-- SPLIT CONTROLS -->
+            <div
+              class="control-option"
+              id="opt-split"
+              onclick="setControlMode('split')"
+            >
+              <div class="control-icon">👐</div>
+              <div class="control-info">
+                <div class="control-title">BOTÕES LATERAIS</div>
+                <div class="control-desc">
+                  Controles divididos para duas mãos. Estilo gamepad.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="btn"
+            style="
+              margin-top: 25px;
+              border-color: rgba(255, 255, 255, 0.2);
+              color: #aaa;
+            "
+            onclick="hideControlsMenu()"
+          >
+            VOLTAR
           </button>
         </div>
 
@@ -553,6 +853,11 @@
           >
             VOLTAR AO MENU
           </button>
+        </div>
+        
+        <!-- Player ID Display -->
+        <div id="player-id-display" style="position: absolute; bottom: 10px; right: 15px; font-size: 12px; color: rgba(0, 255, 204, 0.4); font-family: 'Orbitron', sans-serif;">
+          ID -----
         </div>
       </div>
     </div>
@@ -627,9 +932,11 @@
       // Export safe functions to window
       window.uploadScoreToFirebase = async (name, score) => {
         try {
+          const playerId = localStorage.getItem("snake_player_id");
           await addDoc(collection(db, "rankings"), {
             name: name,
             score: Number(score),
+            playerId: playerId,
             timestamp: serverTimestamp(),
           });
         } catch (e) {
@@ -655,6 +962,7 @@
           return [];
         }
       };
+    </script>
     </script>
 
     <script>
@@ -1105,7 +1413,7 @@
       }
 
       const assets = {
-        skins: Array.from({ length: 5 }, () => new Image()),
+        skins: Array.from({ length: 6 }, () => new Image()), // 5 normais + 1 Bonus
         planets: Array.from({ length: 7 }, () => new Image()),
         isLoaded: false,
         audio: {
@@ -1121,7 +1429,13 @@
       };
 
       assets.skins.forEach((img, i) => {
-        const name = i === 0 ? "Snake" : `Snake${i}`;
+        let name;
+        if (i === 5) {
+          name = "SnakeBonus";
+        } else {
+          name = i === 0 ? "Snake" : `Snake${i}`;
+        }
+        
         img.src = `assets/SnakeAssets/Imagens/${name}.PNG`;
         img.onload = () => {
           if (i === 0) assets.isLoaded = true;
@@ -1137,7 +1451,9 @@
         const container = document.getElementById("skin-selector");
         if (!container) return;
         container.innerHTML = "";
-        assets.skins.forEach((skin, i) => {
+        // Apenas as 5 primeiras skins aparecem no seletor
+        for (let i = 0; i < 5; i++) {
+          const skin = assets.skins[i];
           const div = document.createElement("div");
           div.className = `skin-option ${Game.selectedSkinIndex === i ? "active" : ""}`;
           div.onclick = () => selectSkin(i);
@@ -1146,12 +1462,20 @@
           img.src = skin.src;
           div.appendChild(img);
           container.appendChild(div);
-        });
+        }
       }
 
       function selectSkin(index) {
         Game.selectedSkinIndex = index;
         localStorage.setItem("snake_selected_skin", index);
+        
+        // Se o campeão escolhe outra skin, ativamos o override para uma partida
+        if (Game.isChampion && index !== 5) {
+            Game.skinOverride = true;
+        } else {
+            Game.skinOverride = false;
+        }
+
         playSfx("select");
         updateSkinUI();
       }
@@ -1186,10 +1510,29 @@
         timeSinceLastMove: 0,
         moveInterval: CONFIG.baseSpeed,
         activeBoosts: { speed: 0, immortal: 0 },
+        isChampion: false,
+        skinOverride: false, // Flag se o campeão escolheu outra skin temporariamente
+        controlMode: localStorage.getItem("snake_control_mode") || "joystick", // joystick, swipe, dpad, split
         selectedSkinIndex:
           parseInt(localStorage.getItem("snake_selected_skin")) || 0,
 
         init() {
+          // Garante que o Player ID exista e seja no novo formato (5 dígitos)
+          let playerId = localStorage.getItem("snake_player_id");
+          if (!playerId || playerId.length > 5) { // Reset se for o formato antigo longo
+              playerId = Math.floor(10000 + Math.random() * 90000).toString();
+              localStorage.setItem("snake_player_id", playerId);
+          }
+          
+          // Exibe o ID no menu
+          const idEl = document.getElementById("player-id-display");
+          if (idEl) idEl.innerText = "ID " + playerId;
+
+          // Se for campeão e não estiver em override, força a skin Bonus (index 5)
+          if (this.isChampion && !this.skinOverride) {
+              this.selectedSkinIndex = 5;
+          }
+
           this.snake = [
             { x: 10, y: 10 },
             { x: 9, y: 10 },
@@ -1211,6 +1554,21 @@
           document.getElementById("score-value").innerText = this.score;
           document.getElementById("game-over-overlay").style.display = "none";
           document.getElementById("pause-overlay").style.display = "none";
+
+          // Show D-Pad or Split if needed
+          document.getElementById("dpad-container").style.display = "none";
+          document.getElementById("split-controls-container").style.display =
+            "none";
+
+          if (window.innerWidth < 1000) {
+            if (this.controlMode === "dpad") {
+              document.getElementById("dpad-container").style.display = "block";
+            } else if (this.controlMode === "split") {
+              document.getElementById(
+                "split-controls-container",
+              ).style.display = "block";
+            }
+          }
         },
 
         spawnPlanet() {
@@ -1406,6 +1764,10 @@
             document.getElementById("high-score-section").style.display =
               "none";
           }
+          
+          // Se o campeão jogou com skin manual, agora ela volta pro padrão (Bonus)
+          if (this.isChampion) this.skinOverride = false;
+          
           updateHighScoresUI();
         },
 
@@ -1671,11 +2033,17 @@
             document.getElementById("high-score-section").style.display =
               "none";
           }
+          
+          // Se o campeão jogou com skin manual, agora ela volta pro padrão (Bonus)
+          if (this.isChampion) this.skinOverride = false;
+          
           updateHighScoresUI();
         },
       };
 
-      // --- Joystick Logic ---
+      // --- Input Logic ---
+
+      // 1. JOYSTICK LOGIC
       const joystick = {
         container: document.getElementById("joystick-container"),
         base: document.getElementById("joystick-base"),
@@ -1686,6 +2054,7 @@
         maxDistance: 60,
 
         handleStart(e) {
+          if (Game.controlMode !== "joystick") return;
           if (!Game.isPlaying || Game.isPaused || Game.gameOver) return;
           const touch = e.touches[0];
           this.active = true;
@@ -1744,24 +2113,137 @@
         },
       };
 
+      // 2. SWIPE LOGIC
+      const swipe = {
+        startX: 0,
+        startY: 0,
+
+        handleStart(e) {
+          if (Game.controlMode !== "swipe") return;
+          if (!Game.isPlaying || Game.isPaused || Game.gameOver) return;
+          this.startX = e.touches[0].clientX;
+          this.startY = e.touches[0].clientY;
+        },
+        handleMove(e) {
+          // Optional: Real-time update? Snake usually prefers swipe-end or significant threshold
+          // We'll use simple threshold in move or end.
+        },
+        handleEnd(e) {
+          if (Game.controlMode !== "swipe") return;
+          if (!Game.isPlaying || Game.isPaused || Game.gameOver) return;
+
+          // Note: touchend doesn't have touches[0], need changedTouches
+          const endX = e.changedTouches[0].clientX;
+          const endY = e.changedTouches[0].clientY;
+
+          const dx = endX - this.startX;
+          const dy = endY - this.startY;
+
+          if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return; // Tap considered as pause elsewhere
+
+          if (Math.abs(dx) > Math.abs(dy)) {
+            // Horizontal
+            if (dx > 0 && Game.direction.x === 0)
+              Game.nextDirection = { x: 1, y: 0 };
+            else if (dx < 0 && Game.direction.x === 0)
+              Game.nextDirection = { x: -1, y: 0 };
+          } else {
+            // Vertical
+            if (dy > 0 && Game.direction.y === 0)
+              Game.nextDirection = { x: 0, y: 1 };
+            else if (dy < 0 && Game.direction.y === 0)
+              Game.nextDirection = { x: 0, y: -1 };
+          }
+        },
+      };
+
+      // 3. D-PAD LOGIC & SPLIT LOGIC
+      // Both use buttons with data-dir attribute
+      const handleButtonPress = (e) => {
+        e.preventDefault();
+        const target = e.target.closest("[data-dir]");
+        if (!target) return;
+
+        const dir = target.getAttribute("data-dir");
+        if (!Game.isPlaying) return;
+
+        if (dir === "up" && Game.direction.y === 0)
+          Game.nextDirection = { x: 0, y: -1 };
+        else if (dir === "down" && Game.direction.y === 0)
+          Game.nextDirection = { x: 0, y: 1 };
+        else if (dir === "left" && Game.direction.x === 0)
+          Game.nextDirection = { x: -1, y: 0 };
+        else if (dir === "right" && Game.direction.x === 0)
+          Game.nextDirection = { x: 1, y: 0 };
+      };
+
+      document.querySelectorAll(".dpad-btn, .split-btn").forEach((btn) => {
+        btn.addEventListener(
+          "touchstart",
+          (e) => {
+            e.stopPropagation(); // Impede que o toque chegue na window e cause pause
+            handleButtonPress(e);
+          },
+          { passive: false },
+        );
+
+        btn.addEventListener(
+          "touchend",
+          (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          },
+          { passive: false },
+        );
+
+        // Prevent default mouse events to avoid double firing on some devices
+        btn.addEventListener("mousedown", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        });
+      });
+
       // Add touch listeners
-      window.addEventListener("touchstart", (e) => joystick.handleStart(e), {
-        passive: false,
+      window.addEventListener(
+        "touchstart",
+        (e) => {
+          if (Game.controlMode === "joystick") joystick.handleStart(e);
+          if (Game.controlMode === "swipe") swipe.handleStart(e);
+        },
+        { passive: false },
+      );
+
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (Game.controlMode === "joystick") joystick.handleMove(e);
+        },
+        { passive: false },
+      );
+
+      window.addEventListener("touchend", (e) => {
+        if (Game.controlMode === "joystick") joystick.handleEnd();
+        if (Game.controlMode === "swipe") swipe.handleEnd(e);
       });
-      window.addEventListener("touchmove", (e) => joystick.handleMove(e), {
-        passive: false,
+
+      window.addEventListener("touchcancel", () => {
+        if (Game.controlMode === "joystick") joystick.handleEnd();
       });
-      window.addEventListener("touchend", () => joystick.handleEnd());
-      window.addEventListener("touchcancel", () => joystick.handleEnd());
 
       // Window click for tap-to-pause on mobile
       window.addEventListener("click", (e) => {
         if (
           e.target.closest("button") ||
           e.target.closest(".skin-option") ||
+          e.target.closest(".control-option") ||
+          e.target.closest(".dpad-btn") ||
+          e.target.closest(".split-btn") ||
           e.target.id === "mute-btn"
         )
           return;
+
+        // If joystick mode, only pause if not dragging joystick (handled by active check usually)
+        // If swipe mode, tap is pause.
         if (Game.isPlaying && !Game.gameOver && window.innerWidth < 1000) {
           Game.togglePause();
         }
@@ -1801,6 +2283,15 @@
         if (scores.length === 0) {
           list.innerHTML = "<li style='color: #aaa;'>Sem recordes</li>";
         } else {
+          // Verifica se o jogador local é o campeão mundial
+          const localPlayerId = localStorage.getItem("snake_player_id");
+          const oldChampionStatus = Game.isChampion;
+          Game.isChampion = (scores[0].playerId === localPlayerId);
+
+          if (Game.isChampion && !oldChampionStatus && Game.isPlaying) {
+              showToast("🏆 VOCÊ É O NOVO LÍDER MUNDIAL! SKIN DOURADA LIBERADA!", false);
+          }
+
           scores.forEach((s, i) => {
             const li = document.createElement("li");
             li.style.flexDirection = "column";
@@ -1816,7 +2307,9 @@
 
             const nameSpan = document.createElement("span");
             nameSpan.style.flex = "1";
-            nameSpan.textContent = s.name;
+            let displayName = s.name;
+            if (i === 0) displayName += " <span style='color:#ffd700; font-size:10px; margin-left:5px;'>(Skin 1º🏆)</span>";
+            nameSpan.innerHTML = displayName;
             topRow.appendChild(nameSpan);
 
             const scoreSpan = document.createElement("span");
@@ -1857,9 +2350,48 @@
         void mainContent.offsetWidth; // Trigger reflow
         mainContent.classList.add("animate-fade");
       }
+
+      /* --- CONTROLS MENU INTERACTION --- */
+      function showControlsMenu() {
+        document.getElementById("main-menu-content").style.display = "none";
+        const section = document.getElementById("controls-menu-content");
+        section.style.display = "block";
+        section.classList.remove("animate-fade");
+        void section.offsetWidth;
+        section.classList.add("animate-fade");
+        updateControlMenuUI();
+      }
+
+      function hideControlsMenu() {
+        document.getElementById("controls-menu-content").style.display = "none";
+        const main = document.getElementById("main-menu-content");
+        main.style.display = "block";
+        main.classList.remove("animate-fade");
+        void main.offsetWidth;
+        main.classList.add("animate-fade");
+      }
+
+      function setControlMode(mode) {
+        Game.controlMode = mode;
+        localStorage.setItem("snake_control_mode", mode);
+        updateControlMenuUI();
+        playSfx("select");
+      }
+
+      function updateControlMenuUI() {
+        document
+          .querySelectorAll(".control-option")
+          .forEach((el) => el.classList.remove("selected"));
+        const selected = document.getElementById("opt-" + Game.controlMode);
+        if (selected) selected.classList.add("selected");
+      }
+
       function goToMenu() {
         document.getElementById("game-over-overlay").style.display = "none";
         document.getElementById("start-screen-overlay").style.display = "flex";
+        document.getElementById("dpad-container").style.display = "none";
+        document.getElementById("split-controls-container").style.display =
+          "none";
         Game.isPlaying = false;
       }
       // checkHighScores substituído por lógica interna em endGame e victory
@@ -1907,6 +2439,9 @@
           if (globalScores.length > 0) scores = globalScores;
         }
 
+        const localPlayerId = localStorage.getItem("snake_player_id");
+        Game.isChampion = scores.length > 0 && scores[0].playerId === localPlayerId;
+
         list.innerHTML = "";
         scores.forEach((s, i) => {
           const li = document.createElement("li");
@@ -1921,7 +2456,9 @@
           topRow.innerHTML = `#${i + 1} `;
 
           const nameSpan = document.createElement("span");
-          nameSpan.textContent = s.name;
+          let displayName = s.name;
+          if (i === 0) displayName += " <span style='color:#ffd700; font-size:9px; margin-left:4px;'>(Skin 1º🏆)</span>";
+          nameSpan.innerHTML = displayName;
           topRow.appendChild(nameSpan);
 
           const scoreSpan = document.createElement("span");
