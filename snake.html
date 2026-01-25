@@ -762,9 +762,9 @@
           const hintTitle = controlsHint.querySelector(".label");
           if (hintTitle) hintTitle.innerText = "CONTROLES";
           const hints = controlsHint.querySelectorAll(".hint-item");
-          if (hints.length >= 2) {
-            hints[0].innerText = "ANALOGICO VIRTUAL";
-            hints[1].innerText = "TAP: PAUSE";
+          if (hints.length >= 1) {
+            hints[0].innerText = "TAP: PAUSE";
+            if (hints[1]) hints[1].style.display = "none";
           }
         } else {
           // Desktop Layout (Side panels)
@@ -791,9 +791,9 @@
           const hintTitle = controlsHint.querySelector(".label");
           if (hintTitle) hintTitle.innerText = "DICAS";
           const hints = controlsHint.querySelectorAll(".hint-item");
-          if (hints.length >= 2) {
-            hints[0].innerText = "SETAS / WASD";
-            hints[1].innerText = "ESPAÇO: PAUSE";
+          if (hints.length >= 1) {
+            hints[0].innerText = "SPACE: PAUSE";
+            if (hints[1]) hints[1].style.display = "none";
           }
         }
       }
