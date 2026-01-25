@@ -574,6 +574,66 @@
     </div>
     <div id="debug-info">FPS: --</div>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        query,
+        orderBy,
+        limit,
+        getDocs,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpPnI0cqelrG-J3Dvm7PrEPhAotJYYcZg",
+        authDomain: "suporteapp-snake.firebaseapp.com",
+        projectId: "suporteapp-snake",
+        storageBucket: "suporteapp-snake.firebasestorage.app",
+        messagingSenderId: "176829954299",
+        appId: "1:176829954299:web:73c4cdeeba01a6dab3585e",
+        measurementId: "G-XQWQDV00XZ",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Export safe functions to window
+      window.uploadScoreToFirebase = async (name, score) => {
+        try {
+          await addDoc(collection(db, "rankings"), {
+            name: name,
+            score: Number(score),
+            timestamp: serverTimestamp(),
+          });
+        } catch (e) {
+          console.error("Firebase Add Error:", e);
+        }
+      };
+
+      window.fetchGlobalScores = async () => {
+        try {
+          const q = query(
+            collection(db, "rankings"),
+            orderBy("score", "desc"),
+            limit(5),
+          );
+          const querySnapshot = await getDocs(q);
+          const scores = [];
+          querySnapshot.forEach((doc) => {
+            scores.push(doc.data());
+          });
+          return scores;
+        } catch (e) {
+          console.error("Firebase Fetch Error:", e);
+          return [];
+        }
+      };
+    </script>
+
     <script>
       const CONFIG = {
         gridSize: 30,
@@ -1617,19 +1677,40 @@
         Game.isPlaying = true;
         Game.init();
       }
-      function showHighScoresFromMenu() {
+      async function showHighScoresFromMenu() {
         const list = document.getElementById("menu-high-scores-list");
+        list.innerHTML =
+          "<li style='color: #aaa;'>Carregando ranking global...</li>";
+        document.getElementById("menu-high-scores").style.display = "block";
+
+        let scores = [];
+        if (window.fetchGlobalScores) {
+          scores = await window.fetchGlobalScores();
+        }
+
+        if (scores.length === 0) {
+          const saved = localStorage.getItem("snake_highscores");
+          scores = saved ? JSON.parse(saved) : [];
+        }
+
         list.innerHTML = "";
-        const saved = localStorage.getItem("snake_highscores");
-        const scores = saved ? JSON.parse(saved) : [];
         if (scores.length === 0) {
           list.innerHTML = "<li style='color: #aaa;'>Sem recordes</li>";
         } else {
           scores.forEach((s, i) => {
-            list.innerHTML += `<li>#${i + 1} ${s.name} <span style='color:#00ffcc'>${s.score}</span></li>`;
+            const li = document.createElement("li");
+            li.innerHTML = `#${i + 1} `;
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = s.name; // Anti-injection
+            li.appendChild(nameSpan);
+            const scoreSpan = document.createElement("span");
+            scoreSpan.style.color = "#00ffcc";
+            scoreSpan.style.marginLeft = "10px";
+            scoreSpan.textContent = s.score;
+            li.appendChild(scoreSpan);
+            list.appendChild(li);
           });
         }
-        document.getElementById("menu-high-scores").style.display = "block";
       }
       function hideHighScoresFromMenu() {
         document.getElementById("menu-high-scores").style.display = "none";
@@ -1640,15 +1721,16 @@
         Game.isPlaying = false;
       }
       function checkHighScores(s) {
-        return (
-          Game.highScores.length < 5 ||
-          s > Game.highScores[Game.highScores.length - 1].score
-        );
+        // Now always show the input for global ranking
+        return true;
       }
-      function saveScore() {
-        const name =
-          document.getElementById("player-name-input").value.toUpperCase() ||
-          "ANON";
+      async function saveScore() {
+        const nameInput = document.getElementById("player-name-input");
+        const name = nameInput.value.trim().toUpperCase() || "ANON";
+
+        showToast("Enviando para o universo...");
+
+        // 1. Local
         Game.highScores.push({ name, score: Game.score });
         Game.highScores.sort((a, b) => b.score - a.score);
         Game.highScores = Game.highScores.slice(0, 5);
@@ -1656,14 +1738,39 @@
           "snake_highscores",
           JSON.stringify(Game.highScores),
         );
+
+        // 2. Global
+        if (window.uploadScoreToFirebase) {
+          await window.uploadScoreToFirebase(name, Game.score);
+        }
+
         document.getElementById("high-score-section").style.display = "none";
         updateHighScoresUI();
       }
-      function updateHighScoresUI() {
+
+      async function updateHighScoresUI() {
         const list = document.getElementById("high-scores-list");
+        list.innerHTML = "<li>Carregando global...</li>";
+
+        let scores = Game.highScores;
+
+        if (window.fetchGlobalScores) {
+          const globalScores = await window.fetchGlobalScores();
+          if (globalScores.length > 0) scores = globalScores;
+        }
+
         list.innerHTML = "";
-        Game.highScores.forEach((s, i) => {
-          list.innerHTML += `<li>#${i + 1} ${s.name} <span>${s.score}</span></li>`;
+        scores.forEach((s, i) => {
+          const li = document.createElement("li");
+          li.innerHTML = `#${i + 1} `;
+          const nameSpan = document.createElement("span");
+          nameSpan.textContent = s.name; // Anti-injection
+          li.appendChild(nameSpan);
+          const scoreSpan = document.createElement("span");
+          scoreSpan.style.float = "right";
+          scoreSpan.textContent = ` ${s.score}`;
+          li.appendChild(scoreSpan);
+          list.appendChild(li);
         });
       }
       function restartGame() {
