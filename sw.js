@@ -1,7 +1,7 @@
 // SuporteApp Web - Service Worker
-// Versão 3.7.7
+// Versão 3.7.8
 
-const CACHE_NAME = "suporteapp-v3.7.7";
+const CACHE_NAME = "suporteapp-v3.7.8";
 const urlsToCache = [
   "./",
   "./index.html",

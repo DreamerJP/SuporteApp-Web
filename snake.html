@@ -1729,15 +1729,44 @@
         } else {
           scores.forEach((s, i) => {
             const li = document.createElement("li");
-            li.innerHTML = `#${i + 1} `;
+            li.style.flexDirection = "column";
+            li.style.alignItems = "flex-start";
+            li.style.padding = "10px 0";
+
+            const topRow = document.createElement("div");
+            topRow.style.display = "flex";
+            topRow.style.justifyContent = "space-between";
+            topRow.style.width = "100%";
+            topRow.innerHTML = `#${i + 1} `;
+
             const nameSpan = document.createElement("span");
-            nameSpan.textContent = s.name; // Anti-injection
-            li.appendChild(nameSpan);
+            nameSpan.textContent = s.name;
+            topRow.appendChild(nameSpan);
+
             const scoreSpan = document.createElement("span");
             scoreSpan.style.color = "#00ffcc";
-            scoreSpan.style.marginLeft = "10px";
             scoreSpan.textContent = s.score;
-            li.appendChild(scoreSpan);
+            topRow.appendChild(scoreSpan);
+            li.appendChild(topRow);
+
+            // Adiciona a Data
+            if (s.timestamp) {
+              const dateDiv = document.createElement("div");
+              dateDiv.style.fontSize = "9px";
+              dateDiv.style.color = "rgba(255,255,255,0.4)";
+              dateDiv.style.marginTop = "2px";
+              const date = s.timestamp.toDate
+                ? s.timestamp.toDate()
+                : new Date(s.timestamp);
+              dateDiv.textContent = date.toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              li.appendChild(dateDiv);
+            }
+
             list.appendChild(li);
           });
         }
@@ -1798,14 +1827,42 @@
         list.innerHTML = "";
         scores.forEach((s, i) => {
           const li = document.createElement("li");
-          li.innerHTML = `#${i + 1} `;
+          li.style.flexDirection = "column";
+          li.style.alignItems = "flex-start";
+          li.style.padding = "8px 0";
+
+          const topRow = document.createElement("div");
+          topRow.style.display = "flex";
+          topRow.style.justifyContent = "space-between";
+          topRow.style.width = "100%";
+          topRow.innerHTML = `#${i + 1} `;
+
           const nameSpan = document.createElement("span");
-          nameSpan.textContent = s.name; // Anti-injection
-          li.appendChild(nameSpan);
+          nameSpan.textContent = s.name;
+          topRow.appendChild(nameSpan);
+
           const scoreSpan = document.createElement("span");
-          scoreSpan.style.float = "right";
           scoreSpan.textContent = ` ${s.score}`;
-          li.appendChild(scoreSpan);
+          topRow.appendChild(scoreSpan);
+          li.appendChild(topRow);
+
+          // Data formatada
+          if (s.timestamp) {
+            const dateDiv = document.createElement("div");
+            dateDiv.style.fontSize = "9px";
+            dateDiv.style.color = "rgba(255,255,255,0.4)";
+            const date = s.timestamp.toDate
+              ? s.timestamp.toDate()
+              : new Date(s.timestamp);
+            dateDiv.textContent = date.toLocaleString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            li.appendChild(dateDiv);
+          }
+
           list.appendChild(li);
         });
       }
