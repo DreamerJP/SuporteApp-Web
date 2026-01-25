@@ -256,6 +256,21 @@
       .glitch:hover {
         animation: glitch 0.3s infinite;
       }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fade {
+        animation: fadeIn 0.4s ease forwards;
+      }
       #high-scores-list {
         list-style: none;
         padding: 0;
@@ -515,43 +530,57 @@
     <!-- Start Screen -->
     <div id="start-screen-overlay">
       <div class="overlay-content">
-        <div class="subtitle">DEEP SPACE</div>
-        <h1 class="glitch">COSMIC SNAKE</h1>
-        <p class="slogan">Domine o vácuo. Consuma os mundos.</p>
+        <!-- Main Menu Section -->
+        <div id="main-menu-content" class="animate-fade">
+          <div class="subtitle">DEEP SPACE</div>
+          <h1 class="glitch">COSMIC SNAKE</h1>
+          <p class="slogan">Domine o vácuo. Consuma os mundos.</p>
 
-        <div class="skin-label">Select your vessel</div>
-        <div class="skin-selector" id="skin-selector">
-          <!-- Options added via JS -->
-        </div>
+          <div class="skin-label">Select your vessel</div>
+          <div class="skin-selector" id="skin-selector">
+            <!-- Options added via JS -->
+          </div>
 
-        <button class="btn" onclick="startGame()">INITIATE MISSION</button>
-        <button
-          class="btn"
-          style="border-color: rgba(0, 255, 204, 0.3); opacity: 0.8"
-          onclick="showHighScoresFromMenu()"
-        >
-          RANKING GLOBAL
-        </button>
-        <div id="menu-high-scores" style="display: none; margin-top: 20px">
-          <h3
-            style="
-              color: #00ffcc;
-              border-bottom: 1px solid #00ffcc;
-              padding-bottom: 5px;
-            "
-          >
-            TOP 5
-          </h3>
-          <ul
-            id="menu-high-scores-list"
-            style="list-style: none; padding: 0; text-align: left"
-          ></ul>
+          <button class="btn" onclick="startGame()">INITIATE MISSION</button>
           <button
             class="btn"
-            style="font-size: 14px; padding: 5px 10px; margin-top: 15px"
+            style="border-color: rgba(0, 255, 204, 0.3); opacity: 0.8"
+            onclick="showHighScoresFromMenu()"
+          >
+            RANKING GLOBAL
+          </button>
+        </div>
+
+        <!-- Ranking Section -->
+        <div id="ranking-menu-content" style="display: none">
+          <div class="subtitle">GLOBAL RANKING</div>
+          <h1
+            style="
+              font-size: clamp(24px, 6vw, 48px);
+              margin-bottom: 30px;
+              letter-spacing: 3px;
+            "
+          >
+            PILOTOS DE ELITE
+          </h1>
+
+          <div id="menu-high-scores">
+            <ul
+              id="menu-high-scores-list"
+              style="list-style: none; padding: 0; text-align: left"
+            ></ul>
+          </div>
+
+          <button
+            class="btn"
+            style="
+              margin-top: 25px;
+              border-color: rgba(255, 255, 255, 0.2);
+              color: #aaa;
+            "
             onclick="hideHighScoresFromMenu()"
           >
-            Voltar
+            VOLTAR AO MENU
           </button>
         </div>
       </div>
@@ -1720,10 +1749,17 @@
         Game.init();
       }
       async function showHighScoresFromMenu() {
+        // Toggle sections
+        document.getElementById("main-menu-content").style.display = "none";
+        const rankingSection = document.getElementById("ranking-menu-content");
+        rankingSection.style.display = "block";
+        rankingSection.classList.remove("animate-fade");
+        void rankingSection.offsetWidth; // Trigger reflow
+        rankingSection.classList.add("animate-fade");
+
         const list = document.getElementById("menu-high-scores-list");
         list.innerHTML =
           "<li style='color: #aaa;'>Carregando ranking global...</li>";
-        document.getElementById("menu-high-scores").style.display = "block";
 
         let scores = [];
         if (window.fetchGlobalScores) {
@@ -1744,19 +1780,22 @@
             li.style.flexDirection = "column";
             li.style.alignItems = "flex-start";
             li.style.padding = "10px 0";
+            li.style.borderBottom = "1px solid rgba(0, 255, 204, 0.1)";
 
             const topRow = document.createElement("div");
             topRow.style.display = "flex";
             topRow.style.justifyContent = "space-between";
             topRow.style.width = "100%";
-            topRow.innerHTML = `#${i + 1} `;
+            topRow.innerHTML = `<span style="color: #00ffcc; font-weight: bold; margin-right: 15px;">#${i + 1}</span>`;
 
             const nameSpan = document.createElement("span");
+            nameSpan.style.flex = "1";
             nameSpan.textContent = s.name;
             topRow.appendChild(nameSpan);
 
             const scoreSpan = document.createElement("span");
             scoreSpan.style.color = "#00ffcc";
+            scoreSpan.style.fontWeight = "bold";
             scoreSpan.textContent = s.score;
             topRow.appendChild(scoreSpan);
             li.appendChild(topRow);
@@ -1766,7 +1805,7 @@
               const dateDiv = document.createElement("div");
               dateDiv.style.fontSize = "8px";
               dateDiv.style.color = "rgba(0, 255, 204, 0.4)";
-              dateDiv.style.marginTop = "0px";
+              dateDiv.style.marginTop = "2px";
               const date = s.timestamp.toDate
                 ? s.timestamp.toDate()
                 : new Date(s.timestamp);
@@ -1783,8 +1822,14 @@
           });
         }
       }
+
       function hideHighScoresFromMenu() {
-        document.getElementById("menu-high-scores").style.display = "none";
+        document.getElementById("ranking-menu-content").style.display = "none";
+        const mainContent = document.getElementById("main-menu-content");
+        mainContent.style.display = "block";
+        mainContent.classList.remove("animate-fade");
+        void mainContent.offsetWidth; // Trigger reflow
+        mainContent.classList.add("animate-fade");
       }
       function goToMenu() {
         document.getElementById("game-over-overlay").style.display = "none";
