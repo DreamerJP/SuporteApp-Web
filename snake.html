@@ -296,26 +296,6 @@
         display: none;
         font-family: inherit;
       }
-      #boost-container {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        display: flex;
-        gap: 10px;
-      }
-      .boost-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 12px;
-        border: 2px solid white;
-        opacity: 0;
-        transition: opacity 0.3s;
-      }
       #debug-info {
         position: absolute;
         bottom: 10px;
@@ -474,32 +454,6 @@
     </div>
 
     <div id="ui-layer">
-      <div id="boost-container">
-        <div
-          id="boost-speed"
-          class="boost-icon"
-          style="
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            color: #00ffff;
-            display: none;
-          "
-        >
-          ⚡
-        </div>
-        <div
-          id="boost-immortal"
-          class="boost-icon"
-          style="
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
-            color: #ffd700;
-            display: none;
-          "
-        >
-          🛡️
-        </div>
-      </div>
       <div id="score-board">
         <div class="label">SCORE</div>
         <div id="score-value">0</div>
@@ -767,7 +721,6 @@
 
         const scoreBoard = document.getElementById("score-board");
         const controlsHint = document.getElementById("controls-hint");
-        const boostContainer = document.getElementById("boost-container");
         const muteBtn = document.getElementById("mute-btn");
 
         if (isMobile) {
@@ -781,11 +734,6 @@
           controlsHint.style.width = "120px";
           controlsHint.style.top = `${boardY + boardH + 15}px`;
           controlsHint.style.right = "auto";
-
-          boostContainer.style.left = `${width / 2 - 50}px`;
-          boostContainer.style.top = `${boardY + boardH + 75}px`;
-          boostContainer.style.right = "auto";
-          boostContainer.style.width = "100px";
 
           muteBtn.style.bottom = "15px";
           muteBtn.style.left = "15px";
@@ -809,12 +757,6 @@
           controlsHint.style.top = `${boardY + boardH / 2 - 60}px`;
           controlsHint.style.width = "120px";
           controlsHint.style.left = "auto";
-
-          boostContainer.style.right = `${width - (boardX + boardW) - 150}px`;
-          boostContainer.style.top = `${boardY + boardH / 2 + 30}px`;
-          boostContainer.style.left = "auto";
-          boostContainer.style.width = "auto";
-          boostContainer.style.justifyContent = "center";
 
           muteBtn.style.bottom = "20px";
           muteBtn.style.left = "20px";
@@ -1973,18 +1915,6 @@
         drawBackground();
         Game.update(deltaTime);
         Game.draw(ctx);
-
-        const sa = Game.activeBoosts.speed > 0;
-        const ia = Game.activeBoosts.immortal > 0;
-
-        const speedEl = document.getElementById("boost-speed");
-        const immortalEl = document.getElementById("boost-immortal");
-
-        speedEl.style.display = sa ? "flex" : "none";
-        speedEl.style.opacity = sa ? 1 : 0;
-
-        immortalEl.style.display = ia ? "flex" : "none";
-        immortalEl.style.opacity = ia ? 1 : 0;
 
         requestAnimationFrame(loop);
       }
