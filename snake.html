@@ -2293,9 +2293,10 @@
           list.innerHTML = "<li style='color: #aaa;'>Sem recordes</li>";
         } else {
           // Verifica se o jogador local é o campeão mundial
-          const localPlayerId = localStorage.getItem("snake_player_id");
+          const localPlayerId = String(localStorage.getItem("snake_player_id"));
           const oldChampionStatus = Game.isChampion;
-          Game.isChampion = (scores[0].playerId === localPlayerId);
+          // Forçamos String() para garantir que numero vs texto não quebre a comparação
+          Game.isChampion = (String(scores[0].playerId) === localPlayerId);
 
           if (Game.isChampion && !oldChampionStatus && Game.isPlaying) {
               showToast("🏆 VOCÊ É O NOVO LÍDER MUNDIAL! SKIN DOURADA LIBERADA!", false);
@@ -2450,8 +2451,8 @@
           if (globalScores.length > 0) scores = globalScores;
         }
 
-        const localPlayerId = localStorage.getItem("snake_player_id");
-        Game.isChampion = scores.length > 0 && scores[0].playerId === localPlayerId;
+        const localPlayerId = String(localStorage.getItem("snake_player_id"));
+        Game.isChampion = scores.length > 0 && String(scores[0].playerId) === localPlayerId;
         
         updateSkinUI(); // Refresh UI to reflect locked/unlocked state
 
@@ -2564,19 +2565,27 @@
           if (saved) {
               Game.highScores = JSON.parse(saved);
               if (Game.highScores.length > 0) {
-                  Game.isChampion = (Game.highScores[0].playerId === playerId);
+                  // Compara forçando String
+                  Game.isChampion = (String(Game.highScores[0].playerId) === String(playerId));
                   updateSkinUI();
               }
           }
           
-          // 2. Busca o ranking global REAL no Firebase para validar se ainda é o campeão
-          if (window.fetchGlobalScores) {
-              const globalScores = await window.fetchGlobalScores();
-              if (globalScores && globalScores.length > 0) {
-                  Game.isChampion = (globalScores[0].playerId === playerId);
-                  updateSkinUI(); // Atualiza o cadeado visual da skin
+          // 2. Busca o ranking global REAL no Firebase (com uma pequena espera se necessário)
+          const checkGlobal = async () => {
+              if (window.fetchGlobalScores) {
+                  const globalScores = await window.fetchGlobalScores();
+                  if (globalScores && globalScores.length > 0) {
+                      Game.isChampion = (String(globalScores[0].playerId) === String(playerId));
+                      updateSkinUI();
+                  }
+              } else {
+                  // Tenta novamente em 500ms se o Firebase ainda estiver carregando
+                  setTimeout(checkGlobal, 500);
               }
-          }
+          };
+
+          checkGlobal();
       }
 
       initApp();
