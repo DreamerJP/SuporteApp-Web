@@ -271,13 +271,33 @@
       .animate-fade {
         animation: fadeIn 0.4s ease forwards;
       }
-      #high-scores-list {
+      #high-scores-list,
+      #menu-high-scores-list {
         list-style: none;
         padding: 0;
         margin: 20px 0;
         text-align: left;
         width: 100%;
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 5px;
       }
+
+      /* Scrollbar Customization */
+      #high-scores-list::-webkit-scrollbar,
+      #menu-high-scores-list::-webkit-scrollbar {
+        width: 6px;
+      }
+      #high-scores-list::-webkit-scrollbar-thumb,
+      #menu-high-scores-list::-webkit-scrollbar-thumb {
+        background: #00ffcc;
+        border-radius: 3px;
+      }
+      #high-scores-list::-webkit-scrollbar-track,
+      #menu-high-scores-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
       #high-scores-list li {
         display: flex;
         justify-content: space-between;
@@ -519,10 +539,7 @@
           </h1>
 
           <div id="menu-high-scores">
-            <ul
-              id="menu-high-scores-list"
-              style="list-style: none; padding: 0; text-align: left"
-            ></ul>
+            <ul id="menu-high-scores-list"></ul>
           </div>
 
           <button
@@ -625,7 +642,7 @@
           const q = query(
             collection(db, "rankings"),
             orderBy("score", "desc"),
-            limit(5),
+            limit(8),
           );
           const querySnapshot = await getDocs(q);
           const scores = [];
@@ -1347,7 +1364,7 @@
           document.getElementById("score-value").innerText = this.score;
         },
 
-        victory() {
+        async victory() {
           this.gameOver = true;
           playSfx("victory");
           document.getElementById("final-score").innerText = this.score;
@@ -1355,7 +1372,31 @@
           overlay.querySelector("h1").innerText = "VOCÊ VENCEU!";
           overlay.querySelector("h1").style.color = "#ffd700";
           overlay.style.display = "flex";
-          if (checkHighScores(this.score)) {
+
+          let isRecord = false;
+          try {
+            let scores = [];
+            if (window.fetchGlobalScores) {
+              scores = await window.fetchGlobalScores();
+            } else {
+              scores = Game.highScores;
+            }
+
+            if (this.score > 0) {
+              if (scores.length < 8) {
+                isRecord = true;
+              } else {
+                const lowest = scores[scores.length - 1].score;
+                if (this.score > lowest) {
+                  isRecord = true;
+                }
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+
+          if (isRecord) {
             document.getElementById("high-score-section").style.display =
               "block";
             const inp = document.getElementById("player-name-input");
@@ -1587,7 +1628,7 @@
           ctx.restore();
         },
 
-        endGame() {
+        async endGame() {
           this.gameOver = true;
           playSfx("gameover");
           const overlay = document.getElementById("game-over-overlay");
@@ -1595,7 +1636,32 @@
           overlay.querySelector("h1").style.color = "#00ffcc";
           document.getElementById("final-score").innerText = this.score;
           overlay.style.display = "flex";
-          if (checkHighScores(this.score)) {
+
+          let isRecord = false;
+          try {
+            let scores = [];
+            if (window.fetchGlobalScores) {
+              scores = await window.fetchGlobalScores();
+            } else {
+              scores = Game.highScores;
+            }
+
+            if (this.score > 0) {
+              if (scores.length < 8) {
+                isRecord = true;
+              } else {
+                // Se tem 8 ou mais, precisa bater o ultimo
+                const lowest = scores[scores.length - 1].score;
+                if (this.score > lowest) {
+                  isRecord = true;
+                }
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+
+          if (isRecord) {
             document.getElementById("high-score-section").style.display =
               "block";
             const inp = document.getElementById("player-name-input");
@@ -1796,10 +1862,9 @@
         document.getElementById("start-screen-overlay").style.display = "flex";
         Game.isPlaying = false;
       }
+      // checkHighScores substituído por lógica interna em endGame e victory
       function checkHighScores(s) {
-        if (s <= 0) return false;
-        if (Game.highScores.length < 5) return true;
-        return s > Game.highScores[Game.highScores.length - 1].score;
+        return false;
       }
       async function saveScore() {
         const nameInput = document.getElementById("player-name-input");
@@ -1810,7 +1875,7 @@
         // 1. Local
         Game.highScores.push({ name, score: Game.score });
         Game.highScores.sort((a, b) => b.score - a.score);
-        Game.highScores = Game.highScores.slice(0, 5);
+        Game.highScores = Game.highScores.slice(0, 8);
         localStorage.setItem(
           "snake_highscores",
           JSON.stringify(Game.highScores),
