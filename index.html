@@ -1383,47 +1383,80 @@
 
       function filterButtonsBySearch() {
         const cards = document.querySelectorAll(".text-card");
-        const query = searchQuery.toLowerCase();
+        const query = normalizeText(searchQuery);
+        const queryWords = query.split(/\s+/).filter((w) => w.length > 0);
+
+        if (queryWords.length === 0) return;
 
         cards.forEach((card) => {
           const index = card.dataset.index;
           const item = allTexts[index];
           if (!item) return;
 
-          const label = item.label.toLowerCase();
-          const text = item.text.toLowerCase();
+          const targetLabel = normalizeText(item.label);
+          const targetText = normalizeText(item.text);
+          const fullTarget = targetLabel + " " + targetText;
+          const targetWords = fullTarget
+            .split(/\s+/)
+            .filter((w) => w.length > 0);
 
-          // 1. Exact match (Priority)
-          const isExact = label.includes(query) || text.includes(query);
+          // 1. Busca Exata (Prioridade)
+          const isExact = fullTarget.includes(query);
 
-          // 2. Fuzzy match (Typo tolerance)
+          // 2. Busca Fuzzy (Tolerância a erros por palavra)
           let isFuzzy = false;
-          if (!isExact && query.length >= 3) {
-            const words = (label + " " + text).split(/\s+/);
-            const threshold = query.length > 5 ? 2 : 1;
+          if (!isExact && queryWords.length > 0) {
+            let matchedWords = 0;
 
-            for (const word of words) {
-              if (word.length < 3) continue;
-              if (getLevenshteinDistance(word, query) <= threshold) {
-                isFuzzy = true;
-                break;
+            for (const qWord of queryWords) {
+              let wordFound = false;
+
+              // Se a palavra da busca existe exatamente no alvo
+              if (fullTarget.includes(qWord)) {
+                wordFound = true;
+              } else if (qWord.length >= 3) {
+                // Senão, tenta Levenshtein palavra por palavra
+                const threshold = qWord.length > 5 ? 2 : 1;
+                for (const tWord of targetWords) {
+                  if (
+                    tWord.length >= 3 &&
+                    getLevenshteinDistance(qWord, tWord) <= threshold
+                  ) {
+                    wordFound = true;
+                    break;
+                  }
+                }
               }
+
+              if (wordFound) matchedWords++;
+            }
+
+            // Considera match se encontrou a maioria das palavras (ex: 75%)
+            if (matchedWords >= queryWords.length * 0.75) {
+              isFuzzy = true;
             }
           }
 
           if (isExact || isFuzzy) {
-            card.style.display = ""; // Always show
+            card.style.display = "";
             card.classList.add("search-match");
             card.classList.remove("search-no-match");
           } else {
-            card.style.display = ""; // Always show
+            card.style.display = "";
             card.classList.remove("search-match");
             card.classList.add("search-no-match");
           }
         });
       }
 
-      // Helper for typo tolerance
+      // Auxiliares para busca
+      function normalizeText(text) {
+        return text
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+      }
+
       function getLevenshteinDistance(a, b) {
         if (a.length === 0) return b.length;
         if (b.length === 0) return a.length;

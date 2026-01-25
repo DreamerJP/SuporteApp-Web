@@ -1,4 +1,4 @@
-# SuporteApp Web 3.7 - Service Worker
+# SuporteApp Web 3.8.2 - Service Worker
 
 ## O que é o Service Worker?
 

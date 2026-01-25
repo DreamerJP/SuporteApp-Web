@@ -695,8 +695,20 @@
       let currentFps = 0;
 
       function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+
+        // Ajusta o tamanho do buffer do canvas para a densidade de pixels do dispositivo
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+
+        // Mantém o tamanho visual via CSS
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+
+        // Escala o contexto para que as coordenadas do código continuem as mesmas
+        ctx.scale(dpr, dpr);
 
         const isMobile = width < 1000;
 
@@ -706,8 +718,9 @@
           const availableHeight = height - 160;
           const sizeByWidth = Math.floor(availableWidth / CONFIG.cols);
           const sizeByHeight = Math.floor(availableHeight / CONFIG.rows);
+          // Usa Math.floor para garantir números inteiros e evitar sub-pixels embaçados
           CONFIG.gridSize = Math.max(
-            10,
+            15,
             Math.min(sizeByWidth, sizeByHeight, 30),
           );
         } else {

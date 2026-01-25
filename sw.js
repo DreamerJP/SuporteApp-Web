@@ -1,6 +1,6 @@
 // SuporteApp Web - Service Worker
-// Versão 3.8.1 - Otimizado para Atalhos e Offline
-const CACHE_NAME = "suporteapp-v3.8.1";
+// Versão 3.8.2
+const CACHE_NAME = "suporteapp-v3.8.2";
 const urlsToCache = [
   "./",
   "./index.html",
