@@ -932,7 +932,7 @@
       // Export safe functions to window
       window.uploadScoreToFirebase = async (name, score) => {
         try {
-          const playerId = localStorage.getItem("snake_player_id");
+          const playerId = localStorage.getItem("snake_player_id") || "00000";
           await addDoc(collection(db, "rankings"), {
             name: name,
             score: Number(score),
@@ -941,6 +941,9 @@
           });
         } catch (e) {
           console.error("Firebase Add Error:", e);
+          if (e.message.includes("permissions")) {
+             console.warn("Atenção: As regras do Firebase precisam ser atualizadas para aceitar 4 campos (incluindo playerId).");
+          }
         }
       };
 
