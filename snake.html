@@ -1520,17 +1520,6 @@
           parseInt(localStorage.getItem("snake_selected_skin")) || 0,
 
         init() {
-          // Garante que o Player ID exista e seja no novo formato (5 dígitos)
-          let playerId = localStorage.getItem("snake_player_id");
-          if (!playerId || playerId.length > 5) { // Reset se for o formato antigo longo
-              playerId = Math.floor(10000 + Math.random() * 90000).toString();
-              localStorage.setItem("snake_player_id", playerId);
-          }
-          
-          // Exibe o ID no menu
-          const idEl = document.getElementById("player-id-display");
-          if (idEl) idEl.innerText = "ID " + playerId;
-
           // Se for campeão e não estiver em override, força a skin Bonus (index 5)
           if (this.isChampion && !this.skinOverride) {
               this.selectedSkinIndex = 5;
@@ -2541,6 +2530,28 @@
 
         requestAnimationFrame(loop);
       }
+
+      // Inicialização Global (executa ao carregar a página)
+      function initApp() {
+          let playerId = localStorage.getItem("snake_player_id");
+          if (!playerId || playerId.length !== 5) { 
+              playerId = Math.floor(10000 + Math.random() * 90000).toString();
+              localStorage.setItem("snake_player_id", playerId);
+          }
+          const idEl = document.getElementById("player-id-display");
+          if (idEl) idEl.innerText = "ID " + playerId;
+          
+          // Carrega Ranking Local inicial se houver
+          const saved = localStorage.getItem("snake_highscores");
+          if (saved) Game.highScores = JSON.parse(saved);
+          
+          // Checa se o jogador já é o campeão (baseado no ultimo ranking carregado localmente)
+          if (Game.highScores.length > 0) {
+              Game.isChampion = (Game.highScores[0].playerId === playerId);
+          }
+      }
+
+      initApp();
       requestAnimationFrame(loop);
     </script>
   </body>
