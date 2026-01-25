@@ -389,6 +389,41 @@
         box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
         position: absolute;
       }
+      /* Responsive Overlays */
+      @media (max-width: 600px) {
+        .overlay-content {
+          min-width: 90vw;
+          padding: 30px 15px;
+          box-sizing: border-box;
+        }
+
+        h1 {
+          font-size: 38px !important;
+        }
+
+        .subtitle {
+          font-size: 10px;
+        }
+
+        .slogan {
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+
+        .skin-selector {
+          gap: 8px;
+        }
+
+        .skin-option {
+          width: 50px;
+          height: 50px;
+        }
+
+        .btn {
+          padding: 12px 25px;
+          font-size: 14px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -597,27 +632,90 @@
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
 
+        const isMobile = width < 1000;
+
+        // Dynamic GRID size for mobile
+        if (isMobile) {
+          const availableWidth = width - 40;
+          const availableHeight = height - 160;
+          const sizeByWidth = Math.floor(availableWidth / CONFIG.cols);
+          const sizeByHeight = Math.floor(availableHeight / CONFIG.rows);
+          CONFIG.gridSize = Math.max(
+            10,
+            Math.min(sizeByWidth, sizeByHeight, 30),
+          );
+        } else {
+          CONFIG.gridSize = 30;
+        }
+
         boardW = CONFIG.cols * CONFIG.gridSize;
         boardH = CONFIG.rows * CONFIG.gridSize;
         boardX = (width - boardW) / 2;
         boardY = (height - boardH) / 2;
 
-        // Reposiciona Elementos da UI baseados no Board
         const scoreBoard = document.getElementById("score-board");
-        scoreBoard.style.left = `${boardX - 150}px`; // Flanco esquerdo (movido mais para a esquerda)
-        scoreBoard.style.top = `${boardY + boardH / 2 - 40}px`;
-
         const controlsHint = document.getElementById("controls-hint");
-        controlsHint.style.right = `${width - (boardX + boardW) - 150}px`; // Flanco direito (simétrico ao score)
-        controlsHint.style.top = `${boardY + boardH / 2 - 60}px`;
-        controlsHint.style.width = `120px`;
-        controlsHint.style.left = "auto";
-
         const boostContainer = document.getElementById("boost-container");
-        boostContainer.style.right = `${width - (boardX + boardW) - 150}px`;
-        boostContainer.style.top = `${boardY + boardH / 2 + 30}px`;
-        boostContainer.style.left = "auto";
-        boostContainer.style.justifyContent = "center";
+        const muteBtn = document.getElementById("mute-btn");
+
+        if (isMobile) {
+          // Mobile Layout (Stacked)
+          scoreBoard.style.left = `${width / 2 - 75}px`;
+          scoreBoard.style.width = "150px";
+          scoreBoard.style.top = `${boardY - 70}px`;
+          scoreBoard.style.right = "auto";
+
+          controlsHint.style.left = `${width / 2 - 60}px`;
+          controlsHint.style.width = "120px";
+          controlsHint.style.top = `${boardY + boardH + 15}px`;
+          controlsHint.style.right = "auto";
+
+          boostContainer.style.left = `${width / 2 - 50}px`;
+          boostContainer.style.top = `${boardY + boardH + 75}px`;
+          boostContainer.style.right = "auto";
+          boostContainer.style.width = "100px";
+
+          muteBtn.style.bottom = "15px";
+          muteBtn.style.left = "15px";
+
+          // Update hints for mobile
+          const hintTitle = controlsHint.querySelector(".label");
+          if (hintTitle) hintTitle.innerText = "CONTROLES";
+          const hints = controlsHint.querySelectorAll(".hint-item");
+          if (hints.length >= 2) {
+            hints[0].innerText = "ANALOGICO VIRTUAL";
+            hints[1].innerText = "TAP: PAUSE";
+          }
+        } else {
+          // Desktop Layout (Side panels)
+          scoreBoard.style.left = `${boardX - 150}px`;
+          scoreBoard.style.width = "auto";
+          scoreBoard.style.top = `${boardY + boardH / 2 - 40}px`;
+          scoreBoard.style.right = "auto";
+
+          controlsHint.style.right = `${width - (boardX + boardW) - 150}px`;
+          controlsHint.style.top = `${boardY + boardH / 2 - 60}px`;
+          controlsHint.style.width = "120px";
+          controlsHint.style.left = "auto";
+
+          boostContainer.style.right = `${width - (boardX + boardW) - 150}px`;
+          boostContainer.style.top = `${boardY + boardH / 2 + 30}px`;
+          boostContainer.style.left = "auto";
+          boostContainer.style.width = "auto";
+          boostContainer.style.justifyContent = "center";
+
+          muteBtn.style.bottom = "20px";
+          muteBtn.style.left = "20px";
+
+          // Restore default hints for desktop
+          const hintTitle = controlsHint.querySelector(".label");
+          if (hintTitle) hintTitle.innerText = "DICAS";
+          const hints = controlsHint.querySelectorAll(".hint-item");
+          if (hints.length >= 2) {
+            hints[0].innerText = "SETAS / WASD";
+            hints[1].innerText = "ESPAÇO: PAUSE";
+          }
+        }
       }
       window.addEventListener("resize", resize);
       resize();
@@ -1498,6 +1596,19 @@
       });
       window.addEventListener("touchend", () => joystick.handleEnd());
       window.addEventListener("touchcancel", () => joystick.handleEnd());
+
+      // Window click for tap-to-pause on mobile
+      window.addEventListener("click", (e) => {
+        if (
+          e.target.closest("button") ||
+          e.target.closest(".skin-option") ||
+          e.target.id === "mute-btn"
+        )
+          return;
+        if (Game.isPlaying && !Game.gameOver && window.innerWidth < 1000) {
+          Game.togglePause();
+        }
+      });
 
       function startGame() {
         document.getElementById("start-screen-overlay").style.display = "none";
