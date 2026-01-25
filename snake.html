@@ -2550,7 +2550,7 @@
       }
 
       // Inicialização Global (executa ao carregar a página)
-      function initApp() {
+      async function initApp() {
           let playerId = localStorage.getItem("snake_player_id");
           if (!playerId || playerId.length !== 5) { 
               playerId = Math.floor(10000 + Math.random() * 90000).toString();
@@ -2559,13 +2559,23 @@
           const idEl = document.getElementById("player-id-display");
           if (idEl) idEl.innerText = "ID " + playerId;
           
-          // Carrega Ranking Local inicial se houver
+          // 1. Carrega recordes locais primeiro para resposta rápida
           const saved = localStorage.getItem("snake_highscores");
-          if (saved) Game.highScores = JSON.parse(saved);
+          if (saved) {
+              Game.highScores = JSON.parse(saved);
+              if (Game.highScores.length > 0) {
+                  Game.isChampion = (Game.highScores[0].playerId === playerId);
+                  updateSkinUI();
+              }
+          }
           
-          // Checa se o jogador já é o campeão (baseado no ultimo ranking carregado localmente)
-          if (Game.highScores.length > 0) {
-              Game.isChampion = (Game.highScores[0].playerId === playerId);
+          // 2. Busca o ranking global REAL no Firebase para validar se ainda é o campeão
+          if (window.fetchGlobalScores) {
+              const globalScores = await window.fetchGlobalScores();
+              if (globalScores && globalScores.length > 0) {
+                  Game.isChampion = (globalScores[0].playerId === playerId);
+                  updateSkinUI(); // Atualiza o cadeado visual da skin
+              }
           }
       }
 
