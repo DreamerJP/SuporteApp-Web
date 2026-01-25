@@ -69,7 +69,7 @@
 
       .overlay-content {
         background: rgba(15, 25, 45, 0.7);
-        padding: 60px;
+        padding: 40px;
         border: 1px solid rgba(0, 255, 204, 0.3);
         border-radius: 2px; /* Cantos retos para visual mais técnico */
         box-shadow:
@@ -77,9 +77,13 @@
           inset 0 0 20px rgba(0, 255, 204, 0.1);
         text-align: center;
         position: relative;
-        overflow: hidden;
-        min-width: 400px;
+        overflow-y: auto;
+        max-height: 90vh;
+        min-width: 320px;
+        max-width: 600px;
         pointer-events: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #00ffcc rgba(0, 0, 0, 0.3);
       }
 
       /* Decoração Industrial */
@@ -95,13 +99,12 @@
 
       h1 {
         font-family: "Orbitron", sans-serif;
-        margin: 0;
-        font-size: 64px;
+        margin: 0 0 20px 0;
+        font-size: clamp(32px, 8vw, 64px);
         font-weight: 900;
-        letter-spacing: 8px;
-        color: #fff;
-        text-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-        text-transform: uppercase;
+        color: #00ffcc;
+        text-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+        letter-spacing: 5px;
       }
 
       .subtitle {
@@ -1363,7 +1366,16 @@
           overlay.querySelector("h1").innerText = "VOCÊ VENCEU!";
           overlay.querySelector("h1").style.color = "#ffd700";
           overlay.style.display = "flex";
-          checkHighScores(this.score);
+          if (checkHighScores(this.score)) {
+            document.getElementById("high-score-section").style.display =
+              "block";
+            const inp = document.getElementById("player-name-input");
+            inp.style.display = "block";
+            setTimeout(() => inp.focus(), 100);
+          } else {
+            document.getElementById("high-score-section").style.display =
+              "none";
+          }
           updateHighScoresUI();
         },
 
@@ -1752,9 +1764,9 @@
             // Adiciona a Data
             if (s.timestamp) {
               const dateDiv = document.createElement("div");
-              dateDiv.style.fontSize = "9px";
-              dateDiv.style.color = "rgba(255,255,255,0.4)";
-              dateDiv.style.marginTop = "2px";
+              dateDiv.style.fontSize = "8px";
+              dateDiv.style.color = "rgba(0, 255, 204, 0.4)";
+              dateDiv.style.marginTop = "0px";
               const date = s.timestamp.toDate
                 ? s.timestamp.toDate()
                 : new Date(s.timestamp);
@@ -1780,8 +1792,9 @@
         Game.isPlaying = false;
       }
       function checkHighScores(s) {
-        // Now always show the input for global ranking
-        return true;
+        if (s <= 0) return false;
+        if (Game.highScores.length < 5) return true;
+        return s > Game.highScores[Game.highScores.length - 1].score;
       }
       async function saveScore() {
         const nameInput = document.getElementById("player-name-input");
