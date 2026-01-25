@@ -424,6 +424,25 @@
           font-size: 14px;
         }
       }
+      #toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(0, 255, 204, 0.9);
+        color: #050510;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 3000;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      #toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
     </style>
   </head>
   <body>
@@ -473,6 +492,7 @@
         <div class="hint-item">ESPAÇO: PAUSE</div>
       </div>
       <div id="mute-btn" onclick="toggleMute()" title="Alternar Som">🔊</div>
+      <div id="toast">Enviando...</div>
     </div>
 
     <!-- Pause Overlay -->
@@ -826,6 +846,16 @@
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fill();
         }
+      }
+
+      function showToast(msg, isError = false) {
+        const toast = document.getElementById("toast");
+        toast.innerText = msg;
+        toast.style.background = isError
+          ? "rgba(233, 69, 96, 0.9)"
+          : "rgba(0, 255, 204, 0.9)";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
       }
 
       const stars = Array.from({ length: CONFIG.starCount }, () => new Star());
@@ -1741,7 +1771,13 @@
 
         // 2. Global
         if (window.uploadScoreToFirebase) {
-          await window.uploadScoreToFirebase(name, Game.score);
+          try {
+            await window.uploadScoreToFirebase(name, Game.score);
+            showToast("Missão enviada para a central mundial! 🌌");
+          } catch (err) {
+            console.error("Erro ao subir score:", err);
+            showToast("Erro ao enviar ranking mundial.", true);
+          }
         }
 
         document.getElementById("high-score-section").style.display = "none";
