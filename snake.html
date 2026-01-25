@@ -359,6 +359,11 @@
         background: rgba(0, 255, 204, 0.1);
         box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
       }
+      .skin-option.locked {
+        filter: grayscale(1) brightness(0.4);
+        border-color: rgba(255, 255, 255, 0.1);
+        cursor: not-allowed;
+      }
       .skin-option img {
         width: 100%;
         height: auto;
@@ -454,7 +459,7 @@
         font-family: "Orbitron", sans-serif;
         font-weight: bold;
         font-size: 14px;
-        z-index: 3000;
+        z-index: 9999;
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       }
@@ -1416,7 +1421,7 @@
       }
 
       const assets = {
-        skins: Array.from({ length: 6 }, () => new Image()), // 5 normais + 1 Bonus
+        skins: Array.from({ length: 5 }, () => new Image()), // 4 normais (0-3) + 1 Bonus (4)
         planets: Array.from({ length: 7 }, () => new Image()),
         isLoaded: false,
         audio: {
@@ -1433,7 +1438,7 @@
 
       assets.skins.forEach((img, i) => {
         let name;
-        if (i === 5) {
+        if (i === 4) {
           name = "SnakeBonus";
         } else {
           name = i === 0 ? "Snake" : `Snake${i}`;
@@ -1454,12 +1459,25 @@
         const container = document.getElementById("skin-selector");
         if (!container) return;
         container.innerHTML = "";
-        // Apenas as 5 primeiras skins aparecem no seletor
+        
         for (let i = 0; i < 5; i++) {
+          const isBonus = (i === 4);
           const skin = assets.skins[i];
           const div = document.createElement("div");
-          div.className = `skin-option ${Game.selectedSkinIndex === i ? "active" : ""}`;
-          div.onclick = () => selectSkin(i);
+          
+          let statusClass = Game.selectedSkinIndex === i ? "active" : "";
+          if (isBonus && !Game.isChampion) {
+              statusClass += " locked";
+          }
+          
+          div.className = `skin-option ${statusClass}`;
+          div.onclick = () => {
+              if (isBonus && !Game.isChampion) {
+                  showToast("Apenas o Líder Mundial pode usar esta nave! 🏆", true);
+                  return;
+              }
+              selectSkin(i);
+          };
 
           const img = document.createElement("img");
           img.src = skin.src;
@@ -1471,14 +1489,6 @@
       function selectSkin(index) {
         Game.selectedSkinIndex = index;
         localStorage.setItem("snake_selected_skin", index);
-        
-        // Se o campeão escolhe outra skin, ativamos o override para uma partida
-        if (Game.isChampion && index !== 5) {
-            Game.skinOverride = true;
-        } else {
-            Game.skinOverride = false;
-        }
-
         playSfx("select");
         updateSkinUI();
       }
@@ -1501,7 +1511,7 @@
       const Game = {
         snake: [],
         direction: { x: 1, y: 0 },
-        nextDirection: { x: 1, y: 0 },
+        inputQueue: [], // Fila de comandos para evitar perda de inputs rápidos
         planets: [],
         boosts: [],
         particles: [],
@@ -1514,17 +1524,32 @@
         moveInterval: CONFIG.baseSpeed,
         activeBoosts: { speed: 0, immortal: 0 },
         isChampion: false,
-        skinOverride: false, // Flag se o campeão escolheu outra skin temporariamente
         controlMode: localStorage.getItem("snake_control_mode") || "joystick", // joystick, swipe, dpad, split
         selectedSkinIndex:
           parseInt(localStorage.getItem("snake_selected_skin")) || 0,
 
-        init() {
-          // Se for campeão e não estiver em override, força a skin Bonus (index 5)
-          if (this.isChampion && !this.skinOverride) {
-              this.selectedSkinIndex = 5;
-          }
+        addInput(newDir) {
+           // Verifica qual seria a direção base para comparação
+           // Se a fila estiver vazia, compara com a direção atual. 
+           // Se houver itens na fila, compara com o último item da fila.
+           const lastDir = this.inputQueue.length > 0 
+               ? this.inputQueue[this.inputQueue.length - 1] 
+               : this.direction;
 
+           // Evita comandos duplicados seguidos na fila
+           if (newDir.x === lastDir.x && newDir.y === lastDir.y) return;
+
+           // Bloqueia retorno de 180 graus
+           if (newDir.x !== 0 && lastDir.x !== 0) return;
+           if (newDir.y !== 0 && lastDir.y !== 0) return;
+
+           // Limita a fila a 2 comandos para não ficar confuso (buffer de 1 movimento à frente)
+           if (this.inputQueue.length < 2) {
+               this.inputQueue.push(newDir);
+           }
+        },
+
+        init() {
           this.snake = [
             { x: 10, y: 10 },
             { x: 9, y: 10 },
@@ -1532,7 +1557,7 @@
           ];
           this.prevSnake = this.snake.map((s) => ({ ...s }));
           this.direction = { x: 1, y: 0 };
-          this.nextDirection = { x: 1, y: 0 };
+          this.inputQueue = []; 
           this.score = 0;
           this.gameOver = false;
           this.isPaused = false;
@@ -1647,7 +1672,12 @@
 
         move() {
           this.prevSnake = this.snake.map((s) => ({ ...s }));
-          this.direction = this.nextDirection;
+          
+          // Pega o próximo comando da fila, se houver
+          if (this.inputQueue.length > 0) {
+            this.direction = this.inputQueue.shift();
+          }
+
           const head = {
             x: this.snake[0].x + this.direction.x,
             y: this.snake[0].y + this.direction.y,
@@ -1756,9 +1786,6 @@
             document.getElementById("high-score-section").style.display =
               "none";
           }
-          
-          // Se o campeão jogou com skin manual, agora ela volta pro padrão (Bonus)
-          if (this.isChampion) this.skinOverride = false;
           
           updateHighScoresUI();
         },
@@ -2026,9 +2053,6 @@
               "none";
           }
           
-          // Se o campeão jogou com skin manual, agora ela volta pro padrão (Bonus)
-          if (this.isChampion) this.skinOverride = false;
-          
           updateHighScoresUI();
         },
       };
@@ -2084,16 +2108,16 @@
 
             if (absDx > absDy) {
               // Horizontal
-              if (dx > 0 && Game.direction.x === 0)
-                Game.nextDirection = { x: 1, y: 0 };
-              else if (dx < 0 && Game.direction.x === 0)
-                Game.nextDirection = { x: -1, y: 0 };
+              if (dx > 0)
+                Game.addInput({ x: 1, y: 0 });
+              else if (dx < 0)
+                Game.addInput({ x: -1, y: 0 });
             } else {
               // Vertical
-              if (dy > 0 && Game.direction.y === 0)
-                Game.nextDirection = { x: 0, y: 1 };
-              else if (dy < 0 && Game.direction.y === 0)
-                Game.nextDirection = { x: 0, y: -1 };
+              if (dy > 0)
+                Game.addInput({ x: 0, y: 1 });
+              else if (dy < 0)
+                Game.addInput({ x: 0, y: -1 });
             }
           }
         },
@@ -2133,19 +2157,15 @@
 
           if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return; // Tap considered as pause elsewhere
 
-          if (Math.abs(dx) > Math.abs(dy)) {
-            // Horizontal
-            if (dx > 0 && Game.direction.x === 0)
-              Game.nextDirection = { x: 1, y: 0 };
-            else if (dx < 0 && Game.direction.x === 0)
-              Game.nextDirection = { x: -1, y: 0 };
-          } else {
-            // Vertical
-            if (dy > 0 && Game.direction.y === 0)
-              Game.nextDirection = { x: 0, y: 1 };
-            else if (dy < 0 && Game.direction.y === 0)
-              Game.nextDirection = { x: 0, y: -1 };
-          }
+             if (Math.abs(dx) > Math.abs(dy)) {
+                 // Horizontal
+                 if (dx > 0) Game.addInput({ x: 1, y: 0 });
+                 else if (dx < 0) Game.addInput({ x: -1, y: 0 });
+             } else {
+                 // Vertical
+                 if (dy > 0) Game.addInput({ x: 0, y: 1 });
+                 else if (dy < 0) Game.addInput({ x: 0, y: -1 });
+             }
         },
       };
 
@@ -2156,17 +2176,13 @@
         const target = e.target.closest("[data-dir]");
         if (!target) return;
 
-        const dir = target.getAttribute("data-dir");
-        if (!Game.isPlaying) return;
-
-        if (dir === "up" && Game.direction.y === 0)
-          Game.nextDirection = { x: 0, y: -1 };
-        else if (dir === "down" && Game.direction.y === 0)
-          Game.nextDirection = { x: 0, y: 1 };
-        else if (dir === "left" && Game.direction.x === 0)
-          Game.nextDirection = { x: -1, y: 0 };
-        else if (dir === "right" && Game.direction.x === 0)
-          Game.nextDirection = { x: 1, y: 0 };
+          const dir = target.getAttribute('data-dir');
+          if (!Game.isPlaying) return;
+          
+          if (dir === 'up') Game.addInput({ x: 0, y: -1 });
+          else if (dir === 'down') Game.addInput({ x: 0, y: 1 });
+          else if (dir === 'left') Game.addInput({ x: -1, y: 0 });
+          else if (dir === 'right') Game.addInput({ x: 1, y: 0 });
       };
 
       document.querySelectorAll(".dpad-btn, .split-btn").forEach((btn) => {
@@ -2283,6 +2299,8 @@
           if (Game.isChampion && !oldChampionStatus && Game.isPlaying) {
               showToast("🏆 VOCÊ É O NOVO LÍDER MUNDIAL! SKIN DOURADA LIBERADA!", false);
           }
+          
+          updateSkinUI(); // Refresh UI to reflect locked/unlocked state
 
           scores.forEach((s, i) => {
             const li = document.createElement("li");
@@ -2433,6 +2451,8 @@
 
         const localPlayerId = localStorage.getItem("snake_player_id");
         Game.isChampion = scores.length > 0 && scores[0].playerId === localPlayerId;
+        
+        updateSkinUI(); // Refresh UI to reflect locked/unlocked state
 
         list.innerHTML = "";
         scores.forEach((s, i) => {
@@ -2492,23 +2512,20 @@
           }
         }
         if (!Game.isPlaying || Game.isPaused) return;
-        if (["ArrowUp", "w", "W"].includes(e.key) && Game.direction.y === 0)
-          Game.nextDirection = { x: 0, y: -1 };
+        if (["ArrowUp", "w", "W"].includes(e.key))
+          Game.addInput({ x: 0, y: -1 });
         else if (
-          ["ArrowDown", "s", "S"].includes(e.key) &&
-          Game.direction.y === 0
+          ["ArrowDown", "s", "S"].includes(e.key)
         )
-          Game.nextDirection = { x: 0, y: 1 };
+          Game.addInput({ x: 0, y: 1 });
         else if (
-          ["ArrowLeft", "a", "A"].includes(e.key) &&
-          Game.direction.x === 0
+          ["ArrowLeft", "a", "A"].includes(e.key)
         )
-          Game.nextDirection = { x: -1, y: 0 };
+          Game.addInput({ x: -1, y: 0 });
         else if (
-          ["ArrowRight", "d", "D"].includes(e.key) &&
-          Game.direction.x === 0
+          ["ArrowRight", "d", "D"].includes(e.key)
         )
-          Game.nextDirection = { x: 1, y: 0 };
+          Game.addInput({ x: 1, y: 0 });
       });
 
       function loop(timestamp) {
