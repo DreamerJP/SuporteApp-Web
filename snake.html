@@ -10,6 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;500&display=swap"
       rel="stylesheet"
     />
+    <!-- 3D Model Viewer Library -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -373,6 +375,14 @@
         border-color: #ffd700;
         box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.3);
       }
+      .skin-option.gift-skin {
+        border-color: #00ffcc;
+        box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2);
+      }
+      .skin-option.gift-skin.active {
+        border-color: #00ffcc;
+        box-shadow: 0 0 25px rgba(0, 255, 204, 0.6), inset 0 0 15px rgba(0, 255, 204, 0.3);
+      }
       @keyframes goldPulse {
         0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4); }
         50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
@@ -478,6 +488,183 @@
       }
       #toast.show {
         transform: translateX(-50%) translateY(0);
+      }
+
+      /* --- PRESENT OVERLAY --- */
+      #present-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(
+          circle at center,
+          rgba(10, 30, 60, 0.4) 0%,
+          rgba(2, 5, 15, 0.98) 100%
+        );
+        backdrop-filter: blur(15px);
+        z-index: 10000;
+      }
+
+      .present-content {
+        background: linear-gradient(135deg, rgba(15, 25, 45, 0.9), rgba(5, 10, 20, 0.95));
+        padding: 50px 40px;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 4px;
+        box-shadow: 
+          0 0 100px rgba(0, 0, 0, 0.8),
+          0 0 30px rgba(255, 215, 0, 0.1),
+          inset 0 0 40px rgba(255, 215, 0, 0.05);
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        overflow: hidden;
+        animation: presentSlideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      @keyframes presentSlideIn {
+        from { opacity: 0; transform: scale(0.8) translateY(30px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+
+      /* Cantos tecnológicos */
+      .present-content::before, .present-content::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ffd700;
+      }
+      .present-content::before { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+      .present-content::after { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+      /* Scanline animação */
+      .present-scanline {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+        animation: scanline 4s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes scanline {
+        0% { top: 0; opacity: 0; }
+        5% { opacity: 1; }
+        95% { opacity: 1; }
+        100% { top: 100%; opacity: 0; }
+      }
+
+      .present-icon {
+        margin-bottom: 30px;
+        position: relative;
+        display: inline-block;
+      }
+
+      /* Base do holograma */
+      .present-icon::after {
+        content: "";
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 10px;
+        background: radial-gradient(ellipse, rgba(0, 255, 204, 0.4), transparent);
+        filter: blur(5px);
+        animation: holopulse 2s infinite ease-in-out;
+      }
+
+      @keyframes holopulse {
+        0%, 100% { width: 80px; opacity: 0.3; }
+        50% { width: 120px; opacity: 0.7; }
+      }
+
+      .present-icon img, .present-icon model-viewer {
+        width: 180px;
+        height: 180px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5));
+        animation: giftFloat 4s infinite ease-in-out;
+      }
+
+      model-viewer {
+        --poster-color: transparent;
+        outline: none;
+      }
+
+      .present-title {
+        font-family: "Orbitron", sans-serif;
+        color: #ffd700;
+        font-size: 28px;
+        font-weight: 900;
+        margin-bottom: 20px;
+        letter-spacing: 4px;
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      }
+
+      .present-message {
+        color: rgba(255, 255, 255, 0.9);
+        font-family: "Outfit", sans-serif;
+        font-size: 16px;
+        margin-bottom: 35px;
+        line-height: 1.6;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 25px;
+        border-radius: 2px;
+        border-left: 2px solid #ffd700;
+        border-right: 1px solid rgba(255, 215, 0, 0.1);
+        position: relative;
+        clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%);
+      }
+
+      .btn-claim {
+        background: transparent;
+        color: #ffd700;
+        border: 1px solid #ffd700;
+        padding: 18px 0;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 5px;
+        cursor: pointer;
+        transition: all 0.4s;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+      }
+
+      .btn-claim::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+        transition: 0.5s;
+      }
+
+      .btn-claim:hover {
+        background: rgba(255, 215, 0, 0.1);
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        letter-spacing: 8px;
+      }
+
+      .btn-claim:hover::before {
+        left: 100%;
+      }
+
+      .btn-claim:active {
+        transform: scale(0.98);
+        background: #ffd700;
+        color: #000;
       }
 
       /* --- CONTROL OPTIONS MENU --- */
@@ -727,6 +914,39 @@
       </h1>
     </div>
 
+    <!-- Present Overlay -->
+    <div id="present-overlay">
+      <div class="present-content">
+        <div class="present-scanline"></div>
+        <div class="present-icon">
+          <model-viewer 
+            id="present-model"
+            src="assets/SnakeAssets/Imagens/gift.glb" 
+            alt="3D Gift" 
+            auto-rotate 
+            rotation-speed="40deg"
+            camera-controls 
+            disable-zoom
+            auto-rotate-delay="0"
+            interaction-prompt="none"
+            shadow-intensity="1" 
+            environment-image="neutral" 
+            exposure="1.2"
+            loading="eager"
+            style="width: 250px; height: 250px; margin: 0 auto; display: block;"
+          >
+            <!-- Fallback se o 3D falhar ou estiver carregando -->
+            <img src="assets/SnakeAssets/Imagens/gift_icon.png" alt="Presente" slot="poster" style="width: 140px; height: 140px; object-fit: contain;">
+          </model-viewer>
+        </div>
+        <div class="present-title">PRESENTE RECEBIDO</div>
+        <div id="present-msg" class="present-message">
+          "Você recebeu um presente especial!"
+        </div>
+        <button class="btn-claim" onclick="claimGift()">RESGATAR</button>
+      </div>
+    </div>
+
     <!-- Start Screen -->
     <div id="start-screen-overlay">
       <div class="overlay-content">
@@ -928,6 +1148,9 @@
         getFirestore,
         collection,
         addDoc,
+        updateDoc,
+        doc,
+        where,
         query,
         orderBy,
         limit,
@@ -982,6 +1205,40 @@
         } catch (e) {
           console.error("Firebase Fetch Error:", e);
           return [];
+        }
+      };
+
+      window.checkPendingGifts = async (playerId) => {
+        try {
+          const q = query(
+            collection(db, "gifts"),
+            where("targetId", "==", String(playerId)),
+            where("claimed", "==", false),
+            limit(1)
+          );
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const giftDoc = querySnapshot.docs[0];
+            return { id: giftDoc.id, ...giftDoc.data() };
+          }
+          return null;
+        } catch (e) {
+          console.error("Firebase Gift Check Error:", e);
+          return null;
+        }
+      };
+
+      window.markGiftAsClaimed = async (giftId) => {
+        try {
+          const giftRef = doc(db, "gifts", giftId);
+          await updateDoc(giftRef, {
+            claimed: true,
+            claimedAt: serverTimestamp()
+          });
+          return true;
+        } catch (e) {
+          console.error("Firebase Gift Claim Error:", e);
+          return false;
         }
       };
     </script>
@@ -1435,7 +1692,7 @@
       }
 
       const assets = {
-        skins: Array.from({ length: 5 }, () => new Image()), // 4 normais (0-3) + 1 Bonus (4)
+        skins: Array.from({ length: 6 }, () => new Image()), // 4 normais + 1 Bonus + 1 Gift
         planets: Array.from({ length: 7 }, () => new Image()),
         isLoaded: false,
         audio: {
@@ -1454,6 +1711,8 @@
         let name;
         if (i === 4) {
           name = "SnakeBonus";
+        } else if (i === 5) {
+          name = "SnakeGift";
         } else {
           name = i === 0 ? "Snake" : `Snake${i}`;
         }
@@ -1474,17 +1733,23 @@
         if (!container) return;
         container.innerHTML = "";
         
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
           const isBonus = (i === 4);
+          const isGiftSkin = (i === 5);
           const skin = assets.skins[i];
+          if (!skin) continue;
+
           const div = document.createElement("div");
           
           let statusClass = Game.selectedSkinIndex === i ? "active" : "";
+          
           if (isBonus) {
               statusClass += " special";
-              if (!Game.isChampion) {
-                  statusClass += " locked";
-              }
+              if (!Game.isChampion) statusClass += " locked";
+          } else if (isGiftSkin) {
+              statusClass += " gift-skin";
+              const hasGiftSkin = localStorage.getItem("snake_has_gift_skin") === "true";
+              if (!hasGiftSkin) statusClass += " locked";
           }
           
           div.className = `skin-option ${statusClass}`;
@@ -1492,6 +1757,13 @@
               if (isBonus && !Game.isChampion) {
                   showToast("Apenas o Líder Mundial pode usar esta Skin! 🏆", true);
                   return;
+              }
+              if (isGiftSkin) {
+                  const hasGiftSkin = localStorage.getItem("snake_has_gift_skin") === "true";
+                  if (!hasGiftSkin) {
+                      showToast("Esta skin rara é recebida apenas via Presente Especial! 🎁", true);
+                      return;
+                  }
               }
               selectSkin(i);
           };
@@ -1830,6 +2102,10 @@
             // Brilho dourado constante e suave para a skin de campeão
             glowColor = "rgba(255, 215, 0, 0.4)";
             blurSize = 20;
+          } else if (this.selectedSkinIndex === 5) {
+            // Brilho ciano místico para a skin de presente
+            glowColor = "rgba(0, 255, 204, 0.4)";
+            blurSize = 18;
           }
 
           ctx.shadowColor = glowColor;
@@ -2582,8 +2858,53 @@
         requestAnimationFrame(loop);
       }
 
-      // Inicialização Global (executa ao carregar a página)
+      // =========================================================================
+      // INICIALIZAÇÃO E SISTEMA DE RECOMPENSAS (REWARDS & ID)
+      // =========================================================================
+      
+      let championNoticeShown = false; // Evita avisos repetidos na mesma sessão
+      let currentGift = null;          // Armazena o objeto de presente ativo para resgate
+
+      async function claimGift() {
+          if (!currentGift) return;
+          
+          showToast("Resgatando seu presente...");
+          
+          const success = await window.markGiftAsClaimed(currentGift.id);
+          
+          if (success) {
+              // Aplica o efeito do presente
+              if (currentGift.type === 'skin') {
+                  localStorage.setItem("snake_has_gift_skin", "true");
+                  showToast(`INCRÍVEL! Você desbloqueou a Skin COSMIC GIFT! 🌌🎁`);
+                  updateSkinUI(); // Atualiza o seletor para mostrar a skin desbloqueada
+              } else {
+                  showToast("Presente resgatado com sucesso!");
+              }
+              
+              document.getElementById("present-overlay").style.display = "none";
+              playSfx("victory");
+              
+              // Pequena explosão de partículas para celebrar
+              Game.createExplosion(10, 10, "#ffd700", 50);
+          } else {
+              showToast("Erro ao resgatar presente. Tente novamente.", true);
+          }
+      }
+
       async function initApp() {
+          // Debug para o Model Viewer
+          const modelViewer = document.querySelector('model-viewer#present-model');
+          if (modelViewer) {
+              modelViewer.addEventListener('error', (event) => {
+                  console.error("Erro no Model Viewer:", event.detail);
+                  showToast("Erro ao carregar modelo 3D. Usando imagem reserva.", true);
+              });
+              modelViewer.addEventListener('load', () => {
+                  console.log("Modelo 3D carregado com sucesso!");
+              });
+          }
+
           let playerId = localStorage.getItem("snake_player_id");
           if (!playerId || playerId.length !== 5) { 
               playerId = Math.floor(10000 + Math.random() * 90000).toString();
@@ -2603,13 +2924,31 @@
               }
           }
           
-          // 2. Busca o ranking global REAL no Firebase (com uma pequena espera se necessário)
+          // 2. Busca o ranking global REAL e Presentes em PARALELO
           const checkGlobal = async () => {
-              if (window.fetchGlobalScores) {
-                  const globalScores = await window.fetchGlobalScores();
-                  if (globalScores && globalScores.length > 0) {
-                      Game.isChampion = (String(globalScores[0].playerId) === String(playerId));
-                      updateSkinUI();
+              if (window.fetchGlobalScores && window.checkPendingGifts) {
+                  try {
+                      // Dispara ambas as requisições ao mesmo tempo
+                      const [globalScores, gift] = await Promise.all([
+                          window.fetchGlobalScores(),
+                          window.checkPendingGifts(playerId)
+                      ]);
+
+                      // Processa Ranking / Campeão
+                      if (globalScores && globalScores.length > 0) {
+                          Game.isChampion = (String(globalScores[0].playerId) === String(playerId));
+                          updateSkinUI();
+                      }
+                      
+                      // Processa Presente
+                      if (gift) {
+                          currentGift = gift;
+                          document.getElementById("present-msg").innerText = `"${gift.message}"`;
+                          document.getElementById("present-overlay").style.display = "flex";
+                          playSfx("bonus"); 
+                      }
+                  } catch (e) {
+                      console.error("Erro no carregamento paralelo:", e);
                   }
               } else {
                   // Tenta novamente em 500ms se o Firebase ainda estiver carregando
@@ -2619,9 +2958,6 @@
 
           checkGlobal();
       }
-
-      // Função utilitária para verificar se o ID já viu o aviso de campeão nesta sessão
-      let championNoticeShown = false;
 
       initApp();
       requestAnimationFrame(loop);
