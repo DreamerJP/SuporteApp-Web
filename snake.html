@@ -2659,9 +2659,15 @@
 
             const nameSpan = document.createElement("span");
             nameSpan.style.flex = "1";
-            let displayName = s.name;
-            if (i === 0) displayName += " <span style='color:#ffd700; font-size:10px; margin-left:5px;'>(Skin 1º🏆)</span>";
-            nameSpan.innerHTML = displayName;
+            nameSpan.textContent = s.name;
+            if (i === 0) {
+              const trophy = document.createElement("span");
+              trophy.style.color = "#ffd700";
+              trophy.style.fontSize = "10px";
+              trophy.style.marginLeft = "5px";
+              trophy.textContent = "(Skin 1º🏆)";
+              nameSpan.appendChild(trophy);
+            }
             topRow.appendChild(nameSpan);
 
             const scoreSpan = document.createElement("span");
@@ -2816,9 +2822,15 @@
           topRow.innerHTML = `#${i + 1} `;
 
           const nameSpan = document.createElement("span");
-          let displayName = s.name;
-          if (i === 0) displayName += " <span style='color:#ffd700; font-size:9px; margin-left:4px;'>(Skin 1º🏆)</span>";
-          nameSpan.innerHTML = displayName;
+          nameSpan.textContent = s.name;
+          if (i === 0) {
+            const trophy = document.createElement("span");
+            trophy.style.color = "#ffd700";
+            trophy.style.fontSize = "9px";
+            trophy.style.marginLeft = "4px";
+            trophy.textContent = "(Skin 1º🏆)";
+            nameSpan.appendChild(trophy);
+          }
           topRow.appendChild(nameSpan);
 
           const scoreSpan = document.createElement("span");
