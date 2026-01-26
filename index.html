@@ -1834,6 +1834,7 @@
             } else {
               showToast(`${openedCount} abas abertas para o IP ${ip}`);
               input.value = "";
+              input.blur();
             }
           } else {
             console.warn("Nenhum padrão de IP encontrado no texto colado.");
