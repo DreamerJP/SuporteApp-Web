@@ -472,22 +472,48 @@
       }
       #toast {
         position: fixed;
-        bottom: 20px;
+        bottom: 40px;
         left: 50%;
-        transform: translateX(-50%) translateY(100px);
-        background: rgba(0, 255, 204, 0.9);
-        color: #050510;
-        padding: 12px 24px;
-        border-radius: 50px;
+        transform: translateX(-50%) translateY(150px);
+        background: rgba(10, 20, 35, 0.9);
+        backdrop-filter: blur(12px);
+        color: white;
+        padding: 14px 24px;
+        border: 1px solid rgba(0, 255, 204, 0.3);
+        border-left: 4px solid #00ffcc;
         font-family: "Orbitron", sans-serif;
-        font-weight: bold;
-        font-size: 14px;
-        z-index: 9999;
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 10000;
+        transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 255, 204, 0.05);
+        max-width: 85vw;
+        width: max-content;
+        text-align: left;
+        pointer-events: none;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        clip-path: polygon(0 0, 100% 0, 100% 75%, 96% 100%, 0 100%);
       }
       #toast.show {
         transform: translateX(-50%) translateY(0);
+      }
+      #toast.error {
+        border-color: rgba(233, 69, 96, 0.4);
+        border-left-color: #e94560;
+        background: rgba(30, 15, 25, 0.95);
+        box-shadow: 0 15px 40px rgba(233, 69, 96, 0.15);
+      }
+      @media (max-width: 600px) {
+        #toast {
+          width: 90vw;
+          max-width: 320px;
+          font-size: 11px;
+          padding: 12px 18px;
+          bottom: 25px;
+        }
       }
 
       /* --- PRESENT OVERLAY --- */
@@ -1440,14 +1466,25 @@
       }
 
       function showToast(msg, isError = false) {
-        const toast = document.getElementById("toast");
-        toast.innerText = msg;
-        toast.style.background = isError
-          ? "rgba(233, 69, 96, 0.9)"
-          : "rgba(0, 255, 204, 0.9)";
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 6000);
-      }
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  
+  // Limpa quebras de linha extras e espaços
+  toast.innerText = msg.replace(/\s+/g, ' ').trim();
+  
+  // Reset classes e aplica as novas
+  toast.classList.remove("show", "error");
+  if (isError) toast.classList.add("error");
+  
+  // Força reflow para animação funcionar se remover/adicionar rápido
+  void toast.offsetWidth;
+  
+  toast.classList.add("show");
+  
+  // Limpa timeout anterior se houver
+  if (toast.timeout) clearTimeout(toast.timeout);
+  toast.timeout = setTimeout(() => toast.classList.remove("show"), 5000);
+}
 
       const stars = Array.from({ length: CONFIG.starCount }, () => new Star());
 
