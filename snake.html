@@ -1710,14 +1710,14 @@
       assets.skins.forEach((img, i) => {
         let name;
         if (i === 4) {
-          name = "SnakeBonus";
+          name = "SnakeBonus.PNG";
         } else if (i === 5) {
-          name = "SnakeGift";
+          name = "SnakeGift.png";
         } else {
-          name = i === 0 ? "Snake" : `Snake${i}`;
+          name = (i === 0 ? "Snake" : `Snake${i}`) + ".PNG";
         }
         
-        img.src = `assets/SnakeAssets/Imagens/${name}.PNG`;
+        img.src = `assets/SnakeAssets/Imagens/${name}`;
         img.onload = () => {
           if (i === 0) assets.isLoaded = true;
           updateSkinUI();
