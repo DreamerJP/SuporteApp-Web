@@ -1,6 +1,6 @@
 // SuporteApp Web - Service Worker
-// Versão 3.8.3
-const CACHE_NAME = "suporteapp-v3.8.3";
+// Versão 3.8.4
+const CACHE_NAME = "suporteapp-v3.8.4";
 const urlsToCache = [
   "./",
   "./index.html",
@@ -47,6 +47,9 @@ self.addEventListener("activate", (event) => {
 // Evento Fetch Único - Gerencia cache e atalhos PWA
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
+
+  // Ignorar requisições de esquemas não suportados (ex: chrome-extension)
+  if (!url.protocol.startsWith("http")) return;
 
   // 1. Tratamento Especial para o modo compacto (Shortcuts)
   if (
