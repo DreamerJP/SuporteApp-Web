@@ -1915,41 +1915,46 @@
           }
         },
 
+        getAvailablePositions() {
+          const occupied = new Set();
+          this.snake.forEach(s => occupied.add(`${s.x},${s.y}`));
+          this.planets.forEach(p => occupied.add(`${p.x},${p.y}`));
+          this.boosts.forEach(b => occupied.add(`${b.x},${b.y}`));
+
+          const available = [];
+          for (let x = 0; x < CONFIG.cols; x++) {
+            for (let y = 0; y < CONFIG.rows; y++) {
+              if (!occupied.has(`${x},${y}`)) {
+                available.push({ x, y });
+              }
+            }
+          }
+          return available;
+        },
+
         spawnPlanet() {
-          if (this.snake.length >= CONFIG.cols * CONFIG.rows) return;
-          let x,
-            y,
-            valid,
-            attempts = 0;
-          do {
-            x = Math.floor(Math.random() * CONFIG.cols);
-            y = Math.floor(Math.random() * CONFIG.rows);
-            valid = !this.snake.some((s) => s.x === x && s.y === y);
-            attempts++;
-          } while (!valid && attempts < 100);
-          if (valid)
-            this.planets.push(
-              new Planet(
-                x,
-                y,
-                Math.floor(Math.random() * assets.planets.length),
-              ),
-            );
+          const available = this.getAvailablePositions();
+          if (available.length === 0) return;
+
+          const pos = available[Math.floor(Math.random() * available.length)];
+          this.planets.push(
+            new Planet(
+              pos.x,
+              pos.y,
+              Math.floor(Math.random() * assets.planets.length),
+            ),
+          );
         },
 
         spawnBoost() {
           if (Math.random() > 0.1) return;
-          let x, y, valid;
-          do {
-            x = Math.floor(Math.random() * CONFIG.cols);
-            y = Math.floor(Math.random() * CONFIG.rows);
-            valid =
-              !this.snake.some((s) => s.x === x && s.y === y) &&
-              !this.planets.some((p) => p.x === x && p.y === y);
-          } while (!valid);
+          const available = this.getAvailablePositions();
+          if (available.length === 0) return;
+
+          const pos = available[Math.floor(Math.random() * available.length)];
           const types = ["speed", "immortal", "score"];
           this.boosts.push(
-            new Boost(x, y, types[Math.floor(Math.random() * 3)]),
+            new Boost(pos.x, pos.y, types[Math.floor(Math.random() * 3)]),
           );
         },
 
