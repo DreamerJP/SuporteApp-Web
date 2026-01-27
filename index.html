@@ -99,16 +99,96 @@
         gap: 10px;
       }
 
-      .modal-content .settings-group label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
       .modal-content .settings-group label .icon-svg {
         width: 16px;
         height: 16px;
         opacity: 0.7;
+      }
+
+      /* Keep UI Panels consistent even when background is light */
+      header, 
+      .sidebar, 
+      .side-panel, 
+      .modal-content {
+        --text-color: #ffffff;
+        --text-secondary: #a0a0a0;
+        --glass-border: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
+
+      /* Modal Specific Layout Fixes */
+      .modal-content .settings-group {
+        padding: 0 15px 15px 15px;
+        overflow: visible !important; /* Critical: allow dropdown to escape the container */
+      }
+
+      .modal-content .settings-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 15px 0 8px 0;
+      }
+
+      /* Custom Combo Box */
+      .combo-box {
+        position: relative;
+        width: 100%;
+        z-index: 100; /* Ensure box is above other lines */
+      }
+      .combo-arrow {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        opacity: 0.5;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .combo-box.active .combo-arrow {
+        transform: translateY(-50%) rotate(180deg);
+        opacity: 1;
+        color: var(--accent-color);
+      }
+      .combo-dropdown {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        width: 100%;
+        background: #252538; /* More solid background */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 9999; /* Max z-index */
+        display: none;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(20px);
+      }
+      .combo-dropdown.active {
+        display: block;
+        animation: slideDown 0.2s ease-out;
+      }
+      .combo-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .combo-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+      .combo-item.selected {
+        background: rgba(233, 69, 96, 0.1);
+        color: var(--accent-color);
+        font-weight: bold;
+      }
+      .combo-item svg {
+        opacity: 0.6;
       }
 
       /* Header */
@@ -126,7 +206,7 @@
       .logo {
         font-size: 1.5rem;
         font-weight: bold;
-        color: var(--accent-color);
+        color: #ffffff;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -208,7 +288,7 @@
 
       .accent-btn {
         background: var(--accent-color);
-        color: white;
+        color: var(--accent-text-color, white);
         border: none;
       }
       .accent-btn:hover {
@@ -430,6 +510,11 @@
 
       .tool-btn:hover {
         background: rgba(255, 255, 255, 0.1);
+      }
+
+      .tool-btn.active {
+        color: var(--accent-color);
+        background: rgba(233, 69, 96, 0.1);
       }
 
       #notepad-content {
@@ -1149,28 +1234,34 @@
         </div>
         <div class="notepad-toolbar">
           <button
+            id="btn-bold"
             class="tool-btn"
             onclick="document.execCommand('bold', false, null)"
+            title="Negrito"
           >
             <b>B</b>
           </button>
           <button
+            id="btn-italic"
             class="tool-btn"
             onclick="document.execCommand('italic', false, null)"
+            title="Itálico"
           >
             <i>I</i>
           </button>
           <button
+            id="btn-underline"
             class="tool-btn"
             onclick="document.execCommand('underline', false, null)"
+            title="Sublinhado"
           >
             <u>U</u>
           </button>
-          <button class="tool-btn" onclick="saveNotepad()" title="Salvar">
+          <button class="accent-btn" onclick="saveNotepad()" style="margin-left: auto; padding: 4px 10px; height: 26px; font-size: 0.75rem; border-radius: 4px; transform: none;">
             <svg
               class="icon-svg"
               viewBox="0 0 24 24"
-              style="width: 16px; height: 16px"
+              style="width: 14px; height: 14px"
             >
               <path
                 d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z"
@@ -1178,6 +1269,7 @@
               <polyline points="17 21 17 13 7 13 7 21"></polyline>
               <polyline points="7 3 7 8 15 8"></polyline>
             </svg>
+            Salvar
           </button>
         </div>
         <div
@@ -1250,15 +1342,23 @@
               </svg>
               Categoria</label
             >
-            <input
-              type="text"
-              id="edit-category"
-              class="settings-input"
-              list="category-suggestions"
-            />
-            <datalist id="category-suggestions">
-              <!-- Javascript will populate this -->
-            </datalist>
+            <div class="combo-box" id="category-combo">
+              <input
+                type="text"
+                id="edit-category"
+                class="settings-input"
+                placeholder="Selecione ou digite uma nova..."
+                autocomplete="off"
+                onfocus="showCategoryDropdown()"
+                oninput="filterCategoryDropdown()"
+              />
+              <div class="combo-arrow">
+                <svg class="icon-svg" viewBox="0 0 24 24" style="width: 12px; height: 12px;">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+              <div class="combo-dropdown" id="category-dropdown"></div>
+            </div>
           </div>
 
           <div style="display: flex; gap: 10px; margin-top: 20px">
@@ -1361,11 +1461,11 @@
                   </div>
                 </div>
               </div>
-              <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="saveTheme()" class="accent-btn" style="flex: 2">
+              <div style="display: flex; gap: 10px; margin-top: 15px; height: 40px; align-items: stretch;">
+                <button onclick="saveTheme()" class="accent-btn" style="flex: 2; height: 100%; padding: 0; border: 1px solid transparent; justify-content: center; margin: 0;">
                   Salvar Cores
                 </button>
-                <button onclick="resetTheme()" class="settings-input" style="flex: 1; border-style: dashed; opacity: 0.8; justify-content: center;" title="Restaurar Padrão">
+                <button onclick="resetTheme()" style="flex: 1; height: 100%; padding: 0; border: 1px dashed var(--glass-border); opacity: 0.8; justify-content: center; margin: 0; background: transparent;" title="Restaurar Padrão">
                    <svg class="icon-svg" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                 </button>
               </div>
@@ -1496,7 +1596,7 @@
                   opacity: 0.7;
                 "
               >
-                *Essas portas serão abertas simultaneamente ao clicar em um IP.
+                *Essas portas serão abertas simultaneamente ao colar um IP (http e https).
               </p>
             </div>
           </details>
@@ -1567,7 +1667,7 @@
                   <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
                   <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
                 </svg>
-                Backup Completo (Tudo)</label
+                Backup Completo</label
               >
               <div style="display: flex; gap: 10px; margin-top: 10px">
                 <button
@@ -1584,7 +1684,7 @@
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                   </svg>
-                  Restaurar
+                  Importar
                 </button>
                 <button
                   onclick="exportFullConfig()"
@@ -1600,7 +1700,7 @@
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                   </svg>
-                  Baixar
+                  Exportar
                 </button>
               </div>
               <input
@@ -1630,7 +1730,7 @@
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                   <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
-                Apenas Textos dos Botões (JSON)</label
+                Apenas Textos dos Botões</label
               >
               <div style="display: flex; gap: 10px; margin-top: 10px">
                 <button
@@ -1638,6 +1738,15 @@
                   class="settings-input"
                   style="flex: 1; justify-content: center"
                 >
+                  <svg
+                    class="icon-svg"
+                    viewBox="0 0 24 24"
+                    style="width: 14px; height: 14px"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
                   Importar
                 </button>
                 <button
@@ -1645,6 +1754,15 @@
                   class="settings-input"
                   style="flex: 1; justify-content: center"
                 >
+                  <svg
+                    class="icon-svg"
+                    viewBox="0 0 24 24"
+                    style="width: 14px; height: 14px"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
                   Exportar
                 </button>
               </div>
@@ -1805,7 +1923,84 @@
 
         // --- Global Search Listener ---
         document.addEventListener("keydown", handleGlobalKeydown);
+
+        // --- Notepad Toolbar State Sync ---
+        setInterval(() => {
+          if (!document.getElementById("notepad-panel").classList.contains("collapsed")) {
+            updateNotepadToolbarState();
+          }
+        }, 200);
+
+        // --- Click Outside to Close Combo ---
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest("#category-combo")) {
+            hideCategoryDropdown();
+          }
+        });
       });
+
+      function updateNotepadToolbarState() {
+        const states = {
+          'bold': document.queryCommandState('bold'),
+          'italic': document.queryCommandState('italic'),
+          'underline': document.queryCommandState('underline')
+        };
+        
+        document.getElementById('btn-bold').classList.toggle('active', states.bold);
+        document.getElementById('btn-italic').classList.toggle('active', states.italic);
+        document.getElementById('btn-underline').classList.toggle('active', states.underline);
+      }
+
+      function showCategoryDropdown() {
+        const combo = document.getElementById("category-combo");
+        const dropdown = document.getElementById("category-dropdown");
+        renderCategoryDropdown();
+        combo.classList.add("active");
+        dropdown.classList.add("active");
+      }
+
+      function hideCategoryDropdown() {
+        const combo = document.getElementById("category-combo");
+        const dropdown = document.getElementById("category-dropdown");
+        combo.classList.remove("active");
+        dropdown.classList.remove("active");
+      }
+
+      function filterCategoryDropdown() {
+        renderCategoryDropdown(document.getElementById("edit-category").value);
+      }
+
+      function renderCategoryDropdown(filter = "") {
+        const dropdown = document.getElementById("category-dropdown");
+        const currentVal = document.getElementById("edit-category").value;
+        dropdown.innerHTML = "";
+
+        const filtered = Array.from(categories)
+          .filter(cat => cat !== "Todas")
+          .filter(cat => cat.toLowerCase().includes(filter.toLowerCase()))
+          .sort();
+
+        if (filtered.length === 0 && filter) {
+            dropdown.innerHTML = `<div class="combo-item" style="opacity: 0.5; font-style: italic;">Nova categoria: "${filter}"</div>`;
+            return;
+        }
+
+        filtered.forEach(cat => {
+          const item = document.createElement("div");
+          item.className = `combo-item ${cat === currentVal ? 'selected' : ''}`;
+          item.innerHTML = `
+            <svg class="icon-svg" viewBox="0 0 24 24" style="width: 14px; height: 14px;">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            ${cat}
+          `;
+          item.onclick = () => {
+            document.getElementById("edit-category").value = cat;
+            hideCategoryDropdown();
+          };
+          dropdown.appendChild(item);
+        });
+      }
 
       function handleGlobalKeydown(e) {
         // Skip if user is typing in an input or textarea
@@ -2472,13 +2667,46 @@
         if (saved) ipPorts = saved;
       }
 
+      function getContrastColor(hex) {
+        if (!hex) return "#ffffff";
+        hex = hex.replace("#", "");
+        if (hex.length === 3) {
+          hex = hex
+            .split("")
+            .map((char) => char + char)
+            .join("");
+        }
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5 ? "#000000" : "#ffffff";
+      }
+
       function previewTheme() {
         const bg = document.getElementById("bg-color-picker").value;
         const accent = document.getElementById("accent-color-picker").value;
 
-        document.documentElement.style.setProperty("--bg-color", bg);
-        document.documentElement.style.setProperty("--accent-color", accent);
-        
+        const root = document.documentElement;
+        root.style.setProperty("--bg-color", bg);
+        root.style.setProperty("--accent-color", accent);
+
+        // Auto-invert text colors based on luminance
+        const bgText = getContrastColor(bg);
+        const accentText = getContrastColor(accent);
+
+        root.style.setProperty("--text-color", bgText);
+        root.style.setProperty("--accent-text-color", accentText);
+
+        // Adjust secondary text opacity/color to remain visible but different
+        if (bgText === "#000000") {
+          root.style.setProperty("--text-secondary", "rgba(0,0,0,0.6)");
+          root.style.setProperty("--glass-border", "rgba(0,0,0,0.1)");
+        } else {
+          root.style.setProperty("--text-secondary", "#a0a0a0");
+          root.style.setProperty("--glass-border", "rgba(255,255,255,0.1)");
+        }
+
         // Update wrapper border in real-time
         const accentWrapper = document.getElementById("accent-wrapper");
         if (accentWrapper) accentWrapper.style.borderColor = accent;
@@ -2492,6 +2720,9 @@
           "suporteApp_theme",
           JSON.stringify({ bg, accent }),
         );
+        
+        // Applying here too to ensure persistence on manual save
+        previewTheme();
         showToast("Cores do tema salvas!");
       }
 
@@ -2500,16 +2731,22 @@
         document.documentElement.style.removeProperty("--accent-color");
         localStorage.removeItem("suporteApp_theme");
 
-        // Refresh inputs if panel is open
+        // Refresh inputs and RECALCULATE contrast if panel is open
         const root = document.documentElement;
         setTimeout(() => {
           const bg = getComputedStyle(root).getPropertyValue("--bg-color").trim();
           const accent = getComputedStyle(root).getPropertyValue("--accent-color").trim();
-          document.getElementById("bg-color-picker").value = bg;
-          document.getElementById("accent-color-picker").value = accent;
+          
+          if (document.getElementById("bg-color-picker")) {
+            document.getElementById("bg-color-picker").value = bg;
+            document.getElementById("accent-color-picker").value = accent;
+          }
           
           const accentWrapper = document.getElementById("accent-wrapper");
           if (accentWrapper) accentWrapper.style.borderColor = accent;
+
+          // CRITICAL: Trigger the contrast update for default colors
+          previewTheme();
         }, 50);
         showToast("Tema restaurado para o padrão");
       }
@@ -2517,11 +2754,20 @@
       function loadSettings() {
         const theme = JSON.parse(localStorage.getItem("suporteApp_theme"));
         if (theme) {
-          document.documentElement.style.setProperty("--bg-color", theme.bg);
-          document.documentElement.style.setProperty(
-            "--accent-color",
-            theme.accent,
-          );
+          const root = document.documentElement;
+          root.style.setProperty("--bg-color", theme.bg);
+          root.style.setProperty("--accent-color", theme.accent);
+
+          // Apply contrast colors on load
+          const bgText = getContrastColor(theme.bg);
+          const accentText = getContrastColor(theme.accent);
+          root.style.setProperty("--text-color", bgText);
+          root.style.setProperty("--accent-text-color", accentText);
+
+          if (bgText === "#000000") {
+            root.style.setProperty("--text-secondary", "rgba(0,0,0,0.6)");
+            root.style.setProperty("--glass-border", "rgba(0,0,0,0.1)");
+          }
         }
 
         // Load Compact Mode
@@ -2717,17 +2963,10 @@
         const delBtn = document.getElementById("btn-delete");
         const suggestions = document.getElementById("category-suggestions");
 
-        // Populate category suggestions
-        suggestions.innerHTML = "";
-        categories.forEach((cat) => {
-          if (cat !== "Todas") {
-            const opt = document.createElement("option");
-            opt.value = cat;
-            suggestions.appendChild(opt);
-          }
-        });
-
         idxInput.value = index;
+        
+        // Initial dropdown render
+        renderCategoryDropdown();
 
         if (index === -1) {
           // New Text
