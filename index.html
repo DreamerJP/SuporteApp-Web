@@ -1261,8 +1261,8 @@
            display: none;
         }
 
-        .header-tools button:nth-child(2) {
-          display: none; /* Hide 'Modo Compacto' on mobile since it's already a mobile view */
+        .header-tools button:nth-child(3) {
+          display: none; /* Hide 'Modo Compacto' (3rd child) since it's already a mobile view */
         }
         
         .modal-content {
@@ -1779,6 +1779,9 @@
               <button onclick="installPWA()" class="accent-btn" style="width: 100%; justify-content: center;">
                 Instalar Aplicativo
               </button>
+              <button onclick="checkPWAStatus()" style="width: 100%; margin-top: 10px; font-size: 0.75rem; opacity: 0.6; background: transparent; border: 1px dashed var(--glass-border);">
+                Verificar por que não instala
+              </button>
             </div>
           </details>
 
@@ -2154,6 +2157,19 @@
           document.getElementById("install-group").style.display = "none";
         }
         deferredPrompt = null;
+      }
+
+      function checkPWAStatus() {
+        let msg = "🔍 Diagnóstico PWA:\n";
+        msg += `- HTTPS: ${window.isSecureContext ? "✅" : "❌ (Obrigatório)"}\n`;
+        msg += `- Service Worker: ${"serviceWorker" in navigator ? "✅" : "❌"}\n`;
+        msg += `- Prompt Pronto: ${deferredPrompt ? "✅ Sim" : "❌ Ainda não (O Chrome ainda não validou o app)"}\n`;
+        
+        if (!deferredPrompt) {
+          msg += "\n💡 Dica: No Android, o Chrome pode levar até 30s navegando para liberar a instalação. Tente limpar o cache do site se o erro persistir.";
+        }
+        
+        alert(msg);
       }
 
       function updateNotepadToolbarState() {
