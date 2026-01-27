@@ -3036,20 +3036,28 @@
         }
       }
 
-      function clearLocalData() {
+      async function clearLocalData() {
         const modal = document.getElementById("confirm-modal");
         const confirmBtn = document.getElementById("btn-confirm-reset");
         
         modal.classList.add("active");
 
-        confirmBtn.onclick = () => {
-          localStorage.removeItem("suporteApp_texts");
-          localStorage.removeItem("suporteApp_ports");
-          localStorage.removeItem("suporteApp_jsonUrl");
-          localStorage.removeItem("suporteApp_theme");
-          localStorage.removeItem("suporteApp_notepad");
-          localStorage.removeItem("suporteApp_compact");
-          location.reload();
+        confirmBtn.onclick = async () => {
+          localStorage.clear();
+          
+          // Clear Service Worker Cache and Unregister
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+              await registration.unregister();
+            }
+            const cacheNames = await caches.keys();
+            for (let cacheName of cacheNames) {
+              await caches.delete(cacheName);
+            }
+          }
+          
+          location.reload(true);
         };
       }
 
