@@ -1111,9 +1111,171 @@
         opacity: 1 !important;
       }
 
+      /* --- MOBILE RESPONSIVENESS --- */
       @media (max-width: 768px) {
+        body {
+          overflow: auto; /* Allow scrolling on mobile if needed */
+        }
+
+        header {
+          padding: 10px;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          height: auto;
+        }
+
+        .header-tools {
+          width: 100%;
+          justify-content: center;
+          gap: 10px;
+          padding: 0;
+          overflow: visible;
+        }
+        
+        .ip-group {
+          width: 100%;
+          order: 3; /* Put IP input below buttons on mobile */
+        }
+        
+        #ip-input {
+          width: 100% !important;
+          text-align: center;
+        }
+
+        .header-tools::-webkit-scrollbar {
+          display: none;
+        }
+
+        .header-tools button {
+          padding: 8px;
+          flex-shrink: 0;
+        }
+
+        .header-tools button span:not(.icon-svg) {
+          display: none; /* Hide button text on mobile */
+        }
+
+        #ip-input {
+          width: 140px;
+          font-size: 0.8rem;
+          padding: 6px 10px;
+        }
+
+        main {
+          flex-direction: column;
+          height: auto;
+          min-height: calc(100vh - 100px);
+        }
+
+        .sidebar {
+          width: 100%;
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid var(--glass-border);
+          padding: 8px 0;
+          overflow-x: auto;
+          flex-direction: row;
+          backdrop-filter: blur(25px);
+          background: rgba(26, 26, 46, 0.9);
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        #category-list {
+          flex-direction: row;
+          padding: 0 10px;
+          gap: 5px;
+        }
+
+        .category-btn {
+          padding: 8px 15px;
+          border-left: none;
+          border-bottom: 2px solid transparent;
+          white-space: nowrap;
+          width: auto;
+          font-size: 0.85rem;
+          border-radius: 4px;
+        }
+
+        .category-btn.active {
+          border-bottom-color: var(--accent-color);
+          background: rgba(233, 69, 96, 0.1);
+          background-image: none;
+        }
+
+        .content {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          padding: 15px;
+        }
+
+        .text-card {
+          padding: 12px;
+          min-height: 70px;
+        }
+
+        .card-label {
+          font-size: 0.85rem;
+        }
+
+        .card-preview {
+          font-size: 0.7rem;
+        }
+
+        .side-panel {
+          position: fixed;
+          top: 0;
+          right: 0;
+          width: 100% !important;
+          height: 100%;
+          z-index: 2000;
+          transform: translateX(100%);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          background: var(--bg-color);
+        }
+
+        .side-panel:not(.collapsed) {
+          transform: translateX(0);
+        }
+
         .search-text {
-          font-size: 2.5rem;
+          font-size: 3rem;
+        }
+
+        .search-hint {
+          font-size: 0.6rem;
+          letter-spacing: 2px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .content {
+          grid-template-columns: 1fr;
+          padding: 10px;
+        }
+        
+        .logo span {
+           display: none;
+        }
+
+        .header-tools button:nth-child(2) {
+          display: none; /* Hide 'Modo Compacto' on mobile since it's already a mobile view */
+        }
+        
+        .modal-content {
+          padding: 20px 15px;
+        }
+
+        .settings-input {
+          padding: 10px;
+        }
+        
+        .tag {
+          font-size: 0.75rem;
+          padding: 3px 8px;
         }
       }
     </style>
@@ -1149,7 +1311,7 @@
               d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
             ></path>
           </svg>
-          Bloco de Notas
+          <span>Bloco de Notas</span>
         </button>
         <button onclick="openAppPopup()" title="Abrir em Janela Destacada">
           <svg class="icon-svg" viewBox="0 0 24 24">
@@ -1158,7 +1320,7 @@
             <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
             <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
           </svg>
-          Modo Compacto
+          <span>Modo Compacto</span>
         </button>
         <button onclick="openEditModal(-1)">
           <svg class="icon-svg" viewBox="0 0 24 24">
@@ -1166,7 +1328,7 @@
             <line x1="12" y1="8" x2="12" y2="16"></line>
             <line x1="8" y1="12" x2="16" y2="12"></line>
           </svg>
-          Novo Botão
+          <span>Novo Botão</span>
         </button>
         <button onclick="toggleSettings()">
           <svg class="icon-svg" viewBox="0 0 24 24">
@@ -1175,7 +1337,7 @@
             ></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          Config
+          <span>Config</span>
         </button>
       </div>
     </header>
@@ -1959,21 +2121,22 @@
         });
 
         // --- PWA Installation Logic ---
+        console.log("[PWA] Verificando ambiente...");
+        console.log("- HTTPS (Secure Context):", window.isSecureContext);
+        console.log("- ServiceWorker em navigator:", ("serviceWorker" in navigator));
+        
         window.addEventListener("beforeinstallprompt", (e) => {
-          // Previne que o Chrome mostre o banner automático
           e.preventDefault();
-          // Guarda o evento para disparar depois
           deferredPrompt = e;
-          // Mostra o grupo de instalação nas configurações
           document.getElementById("install-group").style.display = "block";
-          console.log("[PWA] Prompt de instalação capturado.");
+          console.log("[PWA] ✅ Prompt de instalação CAPTURADO e PRONTO!");
         });
 
         window.addEventListener("appinstalled", (e) => {
-          console.log("[PWA] Aplicativo instalado com sucesso!");
+          console.log("[PWA] 🎉 Aplicativo instalado com sucesso!");
           document.getElementById("install-group").style.display = "none";
           deferredPrompt = null;
-          showToast("Aplicativo instalado com sucesso!");
+          showToast("Aplicativo instalado!");
         });
       });
 
