@@ -1,8 +1,8 @@
 {
-  "name": "SuporteApp Web 3.8.3",
+  "name": "SuporteApp Web",
   "short_name": "SuporteApp",
   "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
-  "id": "./",
+  "id": "suporteapp-v3-8",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",
@@ -11,11 +11,6 @@
   "categories": ["productivity", "utilities"],
   "lang": "pt-BR",
   "icons": [
-    {
-      "src": "assets/SuporteApp-Assets/favicon.ico",
-      "sizes": "16x16 32x48 64x64",
-      "type": "image/x-icon"
-    },
     {
       "src": "assets/SuporteApp-Assets/favicon.png",
       "sizes": "192x192",
@@ -47,18 +42,24 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Interface Principal do SuporteApp"
+      "label": "Interface Principal Desktop"
+    },
+    {
+      "src": "assets/SuporteApp-Assets/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Interface Principal Mobile"
     }
   ],
   "shortcuts": [
     {
       "name": "Abrir no modo compacto",
       "url": "index.html?mode=popup",
-      "description": "Abrir o app diretamente no modo compacto"
+      "description": "Abrir o app diretamente no modo compacto",
+      "icons": [
+        { "src": "assets/SuporteApp-Assets/favicon.png", "sizes": "192x192" }
+      ]
     }
-  ],
-  "serviceworker": {
-    "src": "sw.js",
-    "scope": "/"
-  }
+  ]
 }

@@ -13,14 +13,16 @@ const urlsToCache = [
 // Instalação - Cacheia os recursos essenciais
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(
-          urlsToCache.map((url) => new Request(url, { cache: "reload" })),
-        );
-      })
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE_NAME).then(async (cache) => {
+      console.log("[SW] Iniciando cache de recursos...");
+      for (const url of urlsToCache) {
+        try {
+          await cache.add(new Request(url, { cache: "reload" }));
+        } catch (err) {
+          console.warn(`[SW] Falha ao cachear: ${url} - O arquivo pode estar faltando.`, err);
+        }
+      }
+    }).then(() => self.skipWaiting())
   );
 });
 

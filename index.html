@@ -18,10 +18,12 @@
     <link rel="apple-touch-icon" href="assets/SuporteApp-Assets/favicon.png" />
     <meta name="theme-color" content="#e94560" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SuporteApp" />
+    <meta name="application-name" content="SuporteApp" />
+    <meta name="msapplication-TileColor" content="#1a1a2e" />
+    <meta name="msapplication-tap-highlight" content="no" />
     <style>
       :root {
         --bg-color: #1a1a2e;
@@ -1601,6 +1603,23 @@
             </div>
           </details>
 
+          <details class="settings-group" id="install-group" style="display: none;">
+            <summary>
+              <svg class="icon-svg" viewBox="0 0 24 24" style="margin-right: 8px">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Instalação
+            </summary>
+            <div class="details-content">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Instale o SuporteApp para acesso rápido sem barra de endereço e modo offline.</p>
+              <button onclick="installPWA()" class="accent-btn" style="width: 100%; justify-content: center;">
+                Instalar Aplicativo
+              </button>
+            </div>
+          </details>
+
           <details class="settings-group">
             <summary>
               <svg
@@ -1873,6 +1892,7 @@
       let isSearchSelected = false;
       let searchTimeout = null;
       let searchTimerInterval = null;
+      let deferredPrompt = null;
       const SEARCH_IDLE_TIME = 5000;
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -1937,7 +1957,41 @@
             hideCategoryDropdown();
           }
         });
+
+        // --- PWA Installation Logic ---
+        window.addEventListener("beforeinstallprompt", (e) => {
+          // Previne que o Chrome mostre o banner automático
+          e.preventDefault();
+          // Guarda o evento para disparar depois
+          deferredPrompt = e;
+          // Mostra o grupo de instalação nas configurações
+          document.getElementById("install-group").style.display = "block";
+          console.log("[PWA] Prompt de instalação capturado.");
+        });
+
+        window.addEventListener("appinstalled", (e) => {
+          console.log("[PWA] Aplicativo instalado com sucesso!");
+          document.getElementById("install-group").style.display = "none";
+          deferredPrompt = null;
+          showToast("Aplicativo instalado com sucesso!");
+        });
       });
+
+      async function installPWA() {
+        if (!deferredPrompt) {
+          showToast("O prompt de instalação ainda não está pronto...", true);
+          return;
+        }
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`[PWA] Escolha do usuário: ${outcome}`);
+        
+        if (outcome === "accepted") {
+          document.getElementById("install-group").style.display = "none";
+        }
+        deferredPrompt = null;
+      }
 
       function updateNotepadToolbarState() {
         const states = {
