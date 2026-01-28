@@ -1,28 +1,48 @@
 // SuporteApp Web - Service Worker
-// Versão 3.8.5
-const CACHE_NAME = "suporteapp-v3.8.5";
+// A versão é gerenciada no manifest.json
+let CACHE_NAME = "suporteapp-cache"; // fallback genérico
+let APP_VERSION = "dev"; // fallback genérico
+
+// Carrega a versão do manifest.json
+async function loadVersion() {
+  try {
+    const manifestResponse = await fetch("./manifest.json");
+    const manifest = await manifestResponse.json();
+    APP_VERSION = manifest.version || "dev";
+    CACHE_NAME = `suporteapp-v${APP_VERSION}`;
+    console.log(`[SW] Versão carregada: ${APP_VERSION}`);
+  } catch (err) {
+    console.warn("[SW] Falha ao carregar versão do manifest, usando fallback:", err);
+  }
+}
+
 const urlsToCache = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./assets/SuporteApp-Assets/favicon.png",
   "./assets/SuporteApp-Assets/favicon.ico",
+  "./assets/SuporteApp-Assets/favicon-192.png",
+  "./assets/SuporteApp-Assets/favicon-512.png",
+  "./assets/SuporteApp-Assets/ScreenShots1.png",
+  "./assets/SuporteApp-Assets/ScreenShots2.png",
   "./texts.json",
 ];
 
 // Instalação - Cacheia os recursos essenciais
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      console.log("[SW] Iniciando cache de recursos...");
-      for (const url of urlsToCache) {
-        try {
-          await cache.add(new Request(url, { cache: "reload" }));
-        } catch (err) {
-          console.warn(`[SW] Falha ao cachear: ${url} - O arquivo pode estar faltando.`, err);
+    loadVersion().then(() => 
+      caches.open(CACHE_NAME).then(async (cache) => {
+        console.log("[SW] Iniciando cache de recursos...");
+        for (const url of urlsToCache) {
+          try {
+            await cache.add(new Request(url, { cache: "reload" }));
+          } catch (err) {
+            console.warn(`[SW] Falha ao cachear: ${url} - O arquivo pode estar faltando.`, err);
+          }
         }
-      }
-    }).then(() => self.skipWaiting())
+      })
+    ).then(() => self.skipWaiting())
   );
 });
 

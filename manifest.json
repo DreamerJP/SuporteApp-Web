@@ -2,7 +2,8 @@
   "name": "SuporteApp Web",
   "short_name": "SuporteApp",
   "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
-  "id": "suporteapp-v3-8",
+  "version": "3.8.5",
+  "id": "suporteapp-web",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "any",
@@ -12,55 +13,24 @@
   "lang": "pt-BR",
   "icons": [
     {
-      "src": "assets/SuporteApp-Assets/favicon.png",
+      "src": "assets/SuporteApp-Assets/favicon.ico",
       "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/x-icon"
     },
     {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "64x64",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png",
+      "src": "assets/SuporteApp-Assets/favicon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png",
+      "src": "assets/SuporteApp-Assets/favicon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/SuporteApp-Assets/favicon.png",
+      "src": "assets/SuporteApp-Assets/favicon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -68,18 +38,18 @@
   ],
   "screenshots": [
     {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Interface Principal Desktop"
-    },
-    {
-      "src": "assets/SuporteApp-Assets/favicon.png",
-      "sizes": "512x512",
+      "src": "assets/SuporteApp-Assets/ScreenShots1.png",
+      "sizes": "383x824",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Interface Principal Mobile"
+    },
+    {
+      "src": "assets/SuporteApp-Assets/ScreenShots2.png",
+      "sizes": "381x824",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Visualização do App"
     }
   ],
   "shortcuts": [
@@ -88,8 +58,7 @@
       "url": "index.html?mode=popup",
       "description": "Abrir o app diretamente no modo compacto",
       "icons": [
-        { "src": "assets/SuporteApp-Assets/favicon.png", "sizes": "96x96" },
-        { "src": "assets/SuporteApp-Assets/favicon.png", "sizes": "192x192" }
+        { "src": "assets/SuporteApp-Assets/favicon-192.png", "sizes": "192x192", "type": "image/png" }
       ]
     }
   ]
