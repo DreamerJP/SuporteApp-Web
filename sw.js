@@ -25,6 +25,7 @@ const urlsToCache = [
   "./assets/SuporteApp-Assets/favicon-512.png",
   "./assets/SuporteApp-Assets/ScreenShots1.png",
   "./assets/SuporteApp-Assets/ScreenShots2.png",
+  "./assets/SuporteApp-Assets/ScreenShotsDesktop.png",
   "./texts.json",
 ];
 

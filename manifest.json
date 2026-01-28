@@ -50,6 +50,13 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Visualização do App"
+    },
+    {
+      "src": "assets/SuporteApp-Assets/ScreenShotsDesktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Interface Principal Desktop"
     }
   ],
   "shortcuts": [
