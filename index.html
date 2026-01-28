@@ -1679,10 +1679,9 @@
                     onchange="toggleCompactMode()"
                   />
                 </label>
-
                 <label
                   class="toggle-container"
-                  style="justify-content: space-between; margin: 0"
+                  style="justify-content: space-between; margin: 12px 0 0 0"
                 >
                   <span style="display: flex; align-items: center; gap: 8px">
                     <svg
@@ -1717,6 +1716,60 @@
                 *Ative a reorganização para arrastar e soltar os botões na
                 grade.
               </p>
+            </div>
+          </details>
+
+          <details class="settings-group">
+            <summary>
+              <svg
+                class="icon-svg"
+                viewBox="0 0 24 24"
+                style="margin-right: 8px"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              Mensagens
+            </summary>
+            <div class="details-content">
+              <label
+                class="toggle-container"
+                style="justify-content: space-between; margin: 0"
+              >
+                <span style="display: flex; align-items: center; gap: 8px">
+                  <svg
+                    class="icon-svg"
+                    viewBox="0 0 24 24"
+                    style="width: 14px; height: 14px; opacity: 0.7"
+                  >
+                    <path d="M3 21l1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path>
+                  </svg>
+                  Ativar Otimização de Cópia
+                </span>
+                <input
+                  type="checkbox"
+                  id="opa-optimization-toggle"
+                  onchange="updateOpaSettings()"
+                />
+              </label>
+
+              <div id="opa-extra-controls" style="margin-top: 15px; border-top: 1px dashed var(--glass-border); padding-top: 15px;">
+                <label style="margin: 0 0 8px 0; font-size: 0.8rem; display: block; color: var(--text-secondary);">
+                  Linhas extras p/ adicionar:
+                </label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <input 
+                    type="range" 
+                    id="opa-extra-lines" 
+                    min="0" max="3" step="1" 
+                    style="flex: 1; accent-color: var(--accent-color);"
+                    oninput="updateOpaSettings()"
+                  >
+                  <span id="opa-extra-lines-val" style="min-width: 25px; font-weight: bold; color: var(--accent-color);">1</span>
+                </div>
+                <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px; opacity: 0.8; line-height: 1.3;">
+                  *A otimização remove espaços inúteis no início/fim e garante que o chat não "grude" as linhas. Use o slider para forçar mais espaçamento.
+                </p>
+              </div>
             </div>
           </details>
 
@@ -2675,11 +2728,45 @@
         return false;
       }
 
-      // --- Actions ---
+      // --- Copiando Textos ---
+      let isOpaOptimized = true;
+      let opaExtraLines = 1;
+
+      function updateOpaSettings() {
+        isOpaOptimized = document.getElementById("opa-optimization-toggle").checked;
+        opaExtraLines = parseInt(document.getElementById("opa-extra-lines").value);
+        
+        // Update Label
+        document.getElementById("opa-extra-lines-val").innerText = opaExtraLines;
+        
+        const settings = {
+          optimized: isOpaOptimized,
+          lines: opaExtraLines
+        };
+        
+        localStorage.setItem("suporteApp_opaConfig", JSON.stringify(settings));
+        
+        // Show/Hide sub-controls
+        document.getElementById("opa-extra-controls").style.opacity = isOpaOptimized ? "1" : "0.5";
+        document.getElementById("opa-extra-controls").style.pointerEvents = isOpaOptimized ? "all" : "none";
+      }
+
       async function copyText(text) {
         try {
-          await navigator.clipboard.writeText(text);
-          showToast("Copiado com sucesso!");
+          let formattedText = text.trim();
+          
+          if (isOpaOptimized) {
+            // Lógica n+X: Adiciona o número de quebras configurado pelo usuário
+            formattedText = formattedText.replace(/\n+/g, (match) => {
+              return "\r\n".repeat(match.length + opaExtraLines);
+            });
+          } else {
+            // Normalização básica
+            formattedText = formattedText.replace(/\n/g, "\r\n");
+          }
+          
+          await navigator.clipboard.writeText(formattedText);
+          showToast(isOpaOptimized ? "Copiado com Otimização!" : "Copiado com sucesso!");
         } catch (err) {
           console.error("Erro ao copiar", err);
           showToast("Erro ao copiar :(", true);
@@ -3023,6 +3110,23 @@
           window.addEventListener("beforeunload", saveWindowDimensions);
         }
 
+        // Load OPA Config
+        const savedOpa = JSON.parse(localStorage.getItem("suporteApp_opaConfig"));
+        if (savedOpa) {
+            isOpaOptimized = savedOpa.optimized;
+            opaExtraLines = savedOpa.lines;
+            
+            if (document.getElementById("opa-optimization-toggle")) {
+                document.getElementById("opa-optimization-toggle").checked = isOpaOptimized;
+                document.getElementById("opa-extra-lines").value = opaExtraLines;
+                document.getElementById("opa-extra-lines-val").innerText = opaExtraLines;
+                
+                // Set initial opacity
+                document.getElementById("opa-extra-controls").style.opacity = isOpaOptimized ? "1" : "0.5";
+                document.getElementById("opa-extra-controls").style.pointerEvents = isOpaOptimized ? "all" : "none";
+            }
+        }
+
         loadPorts();
       }
 
@@ -3093,6 +3197,8 @@
             theme: JSON.parse(localStorage.getItem("suporteApp_theme")),
             jsonUrl: localStorage.getItem("suporteApp_jsonUrl"),
             ports: JSON.parse(localStorage.getItem("suporteApp_ports") || "[]"),
+            compact: localStorage.getItem("suporteApp_compact") === "true",
+            opaConfig: JSON.parse(localStorage.getItem("suporteApp_opaConfig")),
           },
           data: {
             texts: JSON.parse(localStorage.getItem("suporteApp_texts") || "[]"),
@@ -3140,6 +3246,13 @@
               localStorage.setItem(
                 "suporteApp_ports",
                 JSON.stringify(backup.settings.ports),
+              );
+            if (backup.settings.compact !== undefined)
+              localStorage.setItem("suporteApp_compact", backup.settings.compact);
+            if (backup.settings.opaConfig)
+              localStorage.setItem(
+                "suporteApp_opaConfig",
+                JSON.stringify(backup.settings.opaConfig),
               );
 
             // Restore data
