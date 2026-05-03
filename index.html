@@ -35,6 +35,7 @@
         --glass-border: rgba(255, 255, 255, 0.1);
         --primary-color: #0f3460;
         --accent-color: #e94560;
+        --accent-color-rgb: 233, 69, 96;
         --text-color: #ffffff;
         --text-secondary: #a0a0a0;
         --success-color: #4caf50;
@@ -467,12 +468,12 @@
 
       /* Side Panels (Notepad & Settings) */
       .side-panel {
-        width: 300px;
+        width: 340px;
         background: rgba(0, 0, 0, 0.3);
         border-left: 1px solid var(--glass-border);
         display: flex;
         flex-direction: column;
-        transition: width 0.3s ease;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
       }
@@ -575,199 +576,250 @@
       ::-webkit-scrollbar-thumb:hover {
         background: var(--accent-color);
       }
-      /* Settings Panel & Groups */
-      .side-panel {
-        background: rgba(18, 18, 30, 0.95);
+      /* === Settings Panel — minimal === */
+      #settings-panel {
+        background: rgba(15, 15, 22, 0.96);
         backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border-left: 1px solid var(--glass-border);
-        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
       }
 
-      .panel-header {
-        padding: 20px;
-        font-size: 1.2rem;
-        font-weight: 600;
+      #settings-panel .panel-header {
+        padding: 14px 18px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        color: var(--text-secondary);
+        background: transparent;
         border-bottom: 1px solid var(--glass-border);
-        background: rgba(255, 255, 255, 0.03);
       }
 
-      .panel-content {
-        padding: 15px;
+      #settings-panel .panel-content {
+        padding: 4px 0;
       }
 
       .settings-group {
-        margin-bottom: 15px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        overflow: hidden;
-        transition: all 0.3s ease;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--glass-border);
+        border-radius: 0;
       }
 
-      .settings-group[open] {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(var(--accent-color), 0.4);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      .settings-group:last-child {
+        border-bottom: none;
       }
 
       .settings-group summary {
-        padding: 15px;
+        padding: 14px 18px;
         list-style: none;
         cursor: pointer;
         display: flex;
         align-items: center;
-        font-weight: 500;
+        gap: 10px;
+        font-size: 0.85rem;
+        font-weight: 400;
         color: var(--text-color);
-        transition: background 0.2s;
+        user-select: none;
+      }
+
+      .settings-group summary::-webkit-details-marker {
+        display: none;
       }
 
       .settings-group summary:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .settings-group summary > svg:first-of-type {
+        width: 14px;
+        height: 14px;
+        opacity: 0.55;
+        flex-shrink: 0;
+        margin-right: 0 !important;
+      }
+
+      .settings-group[open] summary > svg:first-of-type {
+        opacity: 0.85;
       }
 
       .settings-group summary::after {
         content: "";
-        width: 8px;
-        height: 8px;
-        border-right: 2px solid var(--text-secondary);
-        border-bottom: 2px solid var(--text-secondary);
+        width: 6px;
+        height: 6px;
+        border-right: 1.5px solid var(--text-secondary);
+        border-bottom: 1.5px solid var(--text-secondary);
         transform: rotate(45deg);
         margin-left: auto;
-        transition: transform 0.3s ease;
+        opacity: 0.5;
+        transition: transform 0.2s ease;
       }
 
       .settings-group[open] summary::after {
         transform: rotate(-135deg);
-        border-color: var(--accent-color);
       }
 
       .details-content {
-        padding: 0 15px 20px 15px;
-        animation: slideDown 0.3s ease-out;
+        padding: 4px 18px 18px 18px;
+        animation: fadeIn 0.18s ease-out;
       }
 
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
 
       .settings-group label {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin: 15px 0 8px 0;
+        gap: 6px;
+        margin: 12px 0 6px 0;
         color: var(--text-secondary);
-        font-size: 0.85rem;
-        font-weight: 500;
+        font-size: 0.75rem;
+        font-weight: 400;
+      }
+
+      .settings-group label:first-child {
+        margin-top: 0;
       }
 
       .settings-input {
         width: 100%;
-        padding: 12px;
-        border-radius: 8px;
+        padding: 8px 10px;
+        border-radius: 6px;
         border: 1px solid var(--glass-border);
-        background: rgba(0, 0, 0, 0.3);
-        color: white;
-        transition: all 0.2s;
-        font-size: 0.9rem;
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--text-color);
+        transition: border-color 0.15s ease;
+        font-size: 0.85rem;
       }
 
       .settings-input:focus {
         border-color: var(--accent-color);
-        background: rgba(0, 0, 0, 0.5);
-        box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+        outline: none;
       }
 
-      /* Color Pickers Refined */
+      .settings-input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.5;
+      }
+
+      /* Color pickers — inline rows */
       .color-picker-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
       }
 
       .color-item {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 10px;
-        border-radius: 10px;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 8px;
+        justify-content: space-between;
+        padding: 8px 10px;
+        background: rgba(0, 0, 0, 0.15);
         border: 1px solid var(--glass-border);
+        border-radius: 6px;
+      }
+
+      .color-item label {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--text-color);
+        text-transform: none;
+        letter-spacing: 0;
       }
 
       .color-preview-wrapper {
         position: relative;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
         overflow: hidden;
-        border: 2px solid white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--glass-border);
         cursor: pointer;
       }
 
       .color-preview-wrapper input[type="color"] {
         position: absolute;
-        top: -10px;
-        left: -10px;
-        width: 60px;
-        height: 60px;
+        top: -6px;
+        left: -6px;
+        width: 36px;
+        height: 36px;
         cursor: pointer;
         padding: 0;
         border: none;
       }
 
+      /* Tags */
       .tag-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
+        gap: 4px;
+        margin-top: 8px;
       }
 
       .tag {
-        background: var(--accent-color);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        display: flex;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--glass-border);
+        color: var(--text-color);
+        padding: 3px 6px 3px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 400;
+        display: inline-flex;
         align-items: center;
-        gap: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        gap: 4px;
+      }
+
+      .tag:hover {
+        background: rgba(255, 255, 255, 0.06);
       }
 
       .tag .icon-svg {
         cursor: pointer;
-        transition: transform 0.2s;
+        opacity: 0.45;
       }
 
       .tag .icon-svg:hover {
-        transform: scale(1.2);
+        opacity: 1;
+      }
+
+      /* Buttons inside settings */
+      .settings-group button {
+        font-size: 0.82rem;
+        padding: 7px 12px;
       }
 
       .settings-group .accent-btn {
         margin-top: 10px;
         width: 100%;
         justify-content: center;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        padding: 8px 12px;
       }
 
+      .settings-group .accent-btn:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* Danger zone */
       .danger-zone {
-        margin-top: 25px;
-        padding-top: 20px;
-        border-top: 1px dashed rgba(255, 107, 107, 0.3);
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--glass-border);
       }
 
-      /* Toggle Switch Styling */
+      .danger-zone .accent-btn {
+        background: transparent;
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+      }
+
+      .danger-zone .accent-btn:hover {
+        background: rgba(255, 107, 107, 0.08);
+        border-color: rgba(255, 107, 107, 0.5);
+      }
+
+      /* Toggle */
       .toggle-container {
         display: flex;
         align-items: center;
@@ -777,49 +829,66 @@
 
       .toggle-container input[type="checkbox"] {
         appearance: none;
-        width: 34px;
-        height: 18px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
+        -webkit-appearance: none;
+        width: 30px;
+        height: 17px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 17px;
         position: relative;
         cursor: pointer;
-        transition: all 0.3s;
-        border: 1px solid var(--glass-border);
+        transition: background 0.15s ease;
+        border: none;
+        flex-shrink: 0;
       }
 
       .toggle-container input[type="checkbox"]::before {
         content: "";
         position: absolute;
-        width: 12px;
-        height: 12px;
-        background: white;
+        width: 13px;
+        height: 13px;
+        background: #ffffff;
         border-radius: 50%;
         top: 2px;
         left: 2px;
-        transition: all 0.3s;
+        transition: transform 0.18s ease;
       }
 
       .toggle-container input[type="checkbox"]:checked {
         background: var(--accent-color);
-        border-color: var(--accent-color);
       }
 
       .toggle-container input[type="checkbox"]:checked::before {
-        left: 18px;
+        transform: translateX(13px);
       }
 
-      /* Tag Styling Overrides */
-      .tag {
-        background: rgba(var(--accent-color), 0.15);
-        border: 1px solid var(--glass-border);
+      /* Scrollbar */
+      #settings-panel .panel-content::-webkit-scrollbar {
+        width: 6px;
+      }
+      #settings-panel .panel-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 3px;
+      }
+      #settings-panel .panel-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      /* Close button */
+      #settings-panel .panel-header .tool-btn {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border-radius: 4px;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        opacity: 0.6;
+      }
+
+      #settings-panel .panel-header .tool-btn:hover {
+        background: rgba(255, 255, 255, 0.06);
+        opacity: 1;
         color: var(--text-color);
-        padding: 4px 10px;
-        transition: all 0.2s;
-      }
-
-      .tag:hover {
-        background: rgba(var(--accent-color), 0.3);
-        transform: translateY(-1px);
       }
 
       /* Modal System */
@@ -1576,8 +1645,14 @@
       <!-- Settings Panel -->
       <div class="side-panel collapsed" id="settings-panel">
         <div class="panel-header">
-          Configurações
-          <button class="tool-btn" onclick="toggleSettings()">
+          <span style="display: flex; align-items: center; gap: 10px;">
+            <svg class="icon-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: var(--accent-color);">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Configurações
+          </span>
+          <button class="tool-btn" onclick="toggleSettings()" title="Fechar">
             <svg
               class="icon-svg"
               viewBox="0 0 24 24"
@@ -1629,12 +1704,15 @@
                   </div>
                 </div>
               </div>
-              <div style="display: flex; gap: 10px; margin-top: 15px; height: 40px; align-items: stretch;">
-                <button onclick="saveTheme()" class="accent-btn" style="flex: 2; height: 100%; padding: 0; border: 1px solid transparent; justify-content: center; margin: 0;">
+              <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button onclick="saveTheme()" class="accent-btn" style="flex: 2; margin: 0;">
                   Salvar Cores
                 </button>
-                <button onclick="resetTheme()" style="flex: 1; height: 100%; padding: 0; border: 1px dashed var(--glass-border); opacity: 0.8; justify-content: center; margin: 0; background: transparent;" title="Restaurar Padrão">
-                   <svg class="icon-svg" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                <button onclick="resetTheme()" title="Restaurar Padrão" style="flex: 1; border: 1px dashed var(--glass-border); background: transparent; justify-content: center; margin: 0;">
+                  <svg class="icon-svg" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -1796,6 +1874,7 @@
                   id="new-port-input"
                   class="settings-input"
                   placeholder="Ex: 8080"
+                  onkeypress="if (event.key === 'Enter') addPort();"
                   style="flex: 1"
                 />
                 <button
@@ -1910,10 +1989,9 @@
                 </svg>
                 Backup Completo</label
               >
-              <div style="display: flex; gap: 10px; margin-top: 10px">
+              <div style="display: flex; gap: 8px; margin-top: 10px">
                 <button
                   onclick="document.getElementById('config-import').click()"
-                  class="settings-input"
                   style="flex: 1; justify-content: center"
                 >
                   <svg
@@ -1929,7 +2007,6 @@
                 </button>
                 <button
                   onclick="exportFullConfig()"
-                  class="settings-input"
                   style="flex: 1; justify-content: center"
                 >
                   <svg
@@ -1973,10 +2050,9 @@
                 </svg>
                 Apenas Textos dos Botões</label
               >
-              <div style="display: flex; gap: 10px; margin-top: 10px">
+              <div style="display: flex; gap: 8px; margin-top: 10px">
                 <button
                   onclick="document.getElementById('file-import').click()"
-                  class="settings-input"
                   style="flex: 1; justify-content: center"
                 >
                   <svg
@@ -1992,7 +2068,6 @@
                 </button>
                 <button
                   onclick="exportJson()"
-                  class="settings-input"
                   style="flex: 1; justify-content: center"
                 >
                   <svg
@@ -2019,7 +2094,6 @@
                 <button
                   onclick="clearLocalData()"
                   class="accent-btn"
-                  style="background: #ff4757"
                 >
                   <svg class="icon-svg" viewBox="0 0 24 24">
                     <path
@@ -2032,7 +2106,6 @@
             </div>
           </details>
         </div>
-      </div>
       </div>
 
       <!-- Confirmation Modal -->
@@ -2050,7 +2123,7 @@
             Tem certeza? Isso apagará permanentemente todos os seus textos, portas e configurações personalizadas.
           </p>
           <div style="display: flex; gap: 10px;">
-            <button onclick="closeConfirmModal()" class="settings-input" style="flex: 1; justify-content: center;">Cancelar</button>
+            <button onclick="closeConfirmModal()" style="flex: 1; justify-content: center;">Cancelar</button>
             <button id="btn-confirm-reset" class="accent-btn" style="flex: 1; background: #ff4757; justify-content: center;">Apagar Tudo</button>
           </div>
         </div>
@@ -2166,12 +2239,33 @@
         // --- Global Search Listener ---
         document.addEventListener("keydown", handleGlobalKeydown);
 
-        // --- Notepad Toolbar State Sync ---
-        setInterval(() => {
-          if (!document.getElementById("notepad-panel").classList.contains("collapsed")) {
-            updateNotepadToolbarState();
+        // --- ESC closes top-most panel/modal ---
+        document.addEventListener("keydown", (e) => {
+          if (e.key !== "Escape") return;
+          const editModal = document.getElementById("edit-modal");
+          const confirmModal = document.getElementById("confirm-modal");
+          const easterModal = document.getElementById("easter-egg-modal");
+          const settings = document.getElementById("settings-panel");
+          const notepad = document.getElementById("notepad-panel");
+
+          if (confirmModal.classList.contains("active")) {
+            confirmModal.classList.remove("active");
+          } else if (editModal.classList.contains("active")) {
+            closeEditModal();
+          } else if (easterModal.classList.contains("active")) {
+            closeEasterEgg();
+          } else if (!settings.classList.contains("collapsed")) {
+            toggleSettings();
+          } else if (!notepad.classList.contains("collapsed")) {
+            toggleNotepad();
           }
-        }, 200);
+        });
+
+        // --- Notepad Toolbar State Sync (event-driven, no polling) ---
+        const notepadEl = document.getElementById("notepad-content");
+        ["keyup", "mouseup", "focus", "input"].forEach((evt) =>
+          notepadEl.addEventListener(evt, updateNotepadToolbarState)
+        );
 
         // --- Click Outside to Close Combo ---
         document.addEventListener("click", (e) => {
@@ -2271,7 +2365,7 @@
           .sort();
 
         if (filtered.length === 0 && filter) {
-            dropdown.innerHTML = `<div class="combo-item" style="opacity: 0.5; font-style: italic;">Nova categoria: "${filter}"</div>`;
+            dropdown.innerHTML = `<div class="combo-item" style="opacity: 0.5; font-style: italic;">Nova categoria: "${escapeHtml(filter)}"</div>`;
             return;
         }
 
@@ -2282,7 +2376,7 @@
             <svg class="icon-svg" viewBox="0 0 24 24" style="width: 14px; height: 14px;">
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>
-            ${cat}
+            ${escapeHtml(cat)}
           `;
           item.onclick = () => {
             document.getElementById("edit-category").value = cat;
@@ -2339,8 +2433,8 @@
           }
         } else if (e.key === "Escape") {
           clearSearch();
-        } else {
-          // Any other key clears selection
+        } else if (isSearchSelected) {
+          // Only react if there was an active selection to deselect
           isSearchSelected = false;
           updateSearch();
         }
@@ -2581,6 +2675,16 @@
       }
 
       // --- Rendering ---
+      function escapeHtml(str) {
+        if (str == null) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
       function renderCategories() {
         const container = document.getElementById("category-list");
         container.innerHTML = `<button class="category-btn ${currentCategory === "Todas" ? "active" : ""}" onclick="filterCategory('Todas')">Todas</button>`;
@@ -2590,7 +2694,7 @@
           .forEach((cat) => {
             const btn = document.createElement("button");
             btn.className = `category-btn ${currentCategory === cat ? "active" : ""}`;
-            btn.innerText = cat;
+            btn.textContent = cat;
             btn.onclick = () => filterCategory(cat);
             container.appendChild(btn);
           });
@@ -2622,8 +2726,8 @@
           }
 
           card.innerHTML = `
-                    <div class="card-label">${item.label}</div>
-                    <div class="card-preview">${item.text}</div>
+                    <div class="card-label">${escapeHtml(item.label)}</div>
+                    <div class="card-preview">${escapeHtml(item.text)}</div>
                     <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${allTexts.indexOf(item)})">
                         <svg class="icon-svg" viewBox="0 0 24 24" style="width: 14px; height: 14px; opacity: 0.6;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
@@ -2966,13 +3070,20 @@
 
       function addPort() {
         const input = document.getElementById("new-port-input");
-        const port = parseInt(input.value);
-        if (port && !ipPorts.includes(port)) {
-          ipPorts.push(port);
-          savePorts();
-          renderPorts();
-          input.value = "";
+        const port = parseInt(input.value, 10);
+        if (!port || port < 1 || port > 65535) {
+          showToast("Porta inválida (1-65535).", true);
+          return;
         }
+        if (ipPorts.includes(port)) {
+          showToast("Essa porta já está na lista.", true);
+          return;
+        }
+        ipPorts.push(port);
+        savePorts();
+        renderPorts();
+        input.value = "";
+        input.focus();
       }
 
       function removePort(port) {
@@ -3007,6 +3118,18 @@
         return luminance > 0.5 ? "#000000" : "#ffffff";
       }
 
+      function hexToRgb(hex) {
+        if (!hex) return "233, 69, 96";
+        hex = hex.replace("#", "");
+        if (hex.length === 3) {
+          hex = hex.split("").map((c) => c + c).join("");
+        }
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        return `${r}, ${g}, ${b}`;
+      }
+
       function previewTheme() {
         const bg = document.getElementById("bg-color-picker").value;
         const accent = document.getElementById("accent-color-picker").value;
@@ -3014,6 +3137,7 @@
         const root = document.documentElement;
         root.style.setProperty("--bg-color", bg);
         root.style.setProperty("--accent-color", accent);
+        root.style.setProperty("--accent-color-rgb", hexToRgb(accent));
 
         // Auto-invert text colors based on luminance
         const bgText = getContrastColor(bg);
@@ -3081,6 +3205,7 @@
           const root = document.documentElement;
           root.style.setProperty("--bg-color", theme.bg);
           root.style.setProperty("--accent-color", theme.accent);
+          root.style.setProperty("--accent-color-rgb", hexToRgb(theme.accent));
 
           // Apply contrast colors on load
           const bgText = getContrastColor(theme.bg);
@@ -3091,6 +3216,9 @@
           if (bgText === "#000000") {
             root.style.setProperty("--text-secondary", "rgba(0,0,0,0.6)");
             root.style.setProperty("--glass-border", "rgba(0,0,0,0.1)");
+          } else {
+            root.style.setProperty("--text-secondary", "#a0a0a0");
+            root.style.setProperty("--glass-border", "rgba(255,255,255,0.1)");
           }
         }
 
@@ -3160,29 +3288,26 @@
         }
       }
 
-      async function clearLocalData() {
-        const modal = document.getElementById("confirm-modal");
-        const confirmBtn = document.getElementById("btn-confirm-reset");
-        
-        modal.classList.add("active");
-
-        confirmBtn.onclick = async () => {
-          localStorage.clear();
-          
-          // Clear Service Worker Cache and Unregister
-          if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (let registration of registrations) {
-              await registration.unregister();
+      function clearLocalData() {
+        showConfirmModal({
+          title: "Confirmar Reset",
+          message: "Tem certeza? Isso apagará permanentemente todos os seus textos, portas e configurações personalizadas.",
+          confirmLabel: "Apagar Tudo",
+          onConfirm: async () => {
+            localStorage.clear();
+            if ("serviceWorker" in navigator) {
+              const registrations = await navigator.serviceWorker.getRegistrations();
+              for (const registration of registrations) {
+                await registration.unregister();
+              }
+              const cacheNames = await caches.keys();
+              for (const cacheName of cacheNames) {
+                await caches.delete(cacheName);
+              }
             }
-            const cacheNames = await caches.keys();
-            for (let cacheName of cacheNames) {
-              await caches.delete(cacheName);
-            }
-          }
-          
-          location.reload(true);
-        };
+            location.reload();
+          },
+        });
       }
 
       function closeConfirmModal() {
@@ -3319,7 +3444,6 @@
         const textInput = document.getElementById("edit-text");
         const catInput = document.getElementById("edit-category");
         const delBtn = document.getElementById("btn-delete");
-        const suggestions = document.getElementById("category-suggestions");
 
         idxInput.value = index;
         
@@ -3388,17 +3512,39 @@
 
       function deleteText() {
         const index = parseInt(document.getElementById("edit-index").value);
-        if (
-          index > -1 &&
-          confirm("Tem certeza que deseja excluir este texto?")
-        ) {
-          allTexts.splice(index, 1);
-          saveLocalTexts();
-          processData(allTexts);
-          filterCategory(currentCategory); // Refresh view
-          closeEditModal();
-          showToast("Texto removido.");
-        }
+        if (index < 0 || isNaN(index)) return;
+
+        showConfirmModal({
+          title: "Excluir Texto",
+          message: "Tem certeza que deseja excluir este texto? Essa ação não pode ser desfeita.",
+          confirmLabel: "Excluir",
+          onConfirm: () => {
+            allTexts.splice(index, 1);
+            saveLocalTexts();
+            processData(allTexts);
+            filterCategory(currentCategory);
+            closeEditModal();
+            showToast("Texto removido.");
+          },
+        });
+      }
+
+      // Reusable confirm modal helper
+      function showConfirmModal({ title, message, confirmLabel = "Confirmar", onConfirm }) {
+        const modal = document.getElementById("confirm-modal");
+        const titleEl = modal.querySelector("h3");
+        const msgEl = modal.querySelector("p");
+        const btnConfirm = document.getElementById("btn-confirm-reset");
+
+        if (titleEl) titleEl.textContent = title;
+        if (msgEl) msgEl.textContent = message;
+        btnConfirm.textContent = confirmLabel;
+
+        modal.classList.add("active");
+        btnConfirm.onclick = () => {
+          modal.classList.remove("active");
+          if (typeof onConfirm === "function") onConfirm();
+        };
       }
       function openAppPopup() {
         // Default dimensions (Wide as per user image)
@@ -3445,6 +3591,15 @@
       let konamiPosition = 0;
 
       document.addEventListener("keydown", (e) => {
+        // Ignore when typing in inputs/editors
+        if (
+          e.target.tagName === "INPUT" ||
+          e.target.tagName === "TEXTAREA" ||
+          e.target.isContentEditable
+        ) {
+          konamiPosition = 0;
+          return;
+        }
         if (e.key === konamiCode[konamiPosition]) {
           konamiPosition++;
           if (konamiPosition === konamiCode.length) {
