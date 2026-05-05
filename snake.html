@@ -903,7 +903,8 @@
         canvas.height = height * dpr;
         canvas.style.width  = width  + "px";
         canvas.style.height = height + "px";
-        ctx.scale(dpr, dpr);
+        // Reseta a transformação antes de aplicar o DPR para não acumular escala
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         const isMobile = width < 1000;
         if (isMobile) {
@@ -922,26 +923,45 @@
         const scoreBoard   = document.getElementById("score-board");
         const controlsHint = document.getElementById("controls-hint");
         const muteBtn      = document.getElementById("mute-btn");
+        const hintTitle    = controlsHint.querySelector(".label");
+        const hints        = controlsHint.querySelectorAll(".hint-item");
 
         if (isMobile) {
-          scoreBoard.style.cssText   += `left:${width/2 - 75}px; width:150px; top:${boardY - 70}px; right:auto;`;
-          controlsHint.style.cssText += `left:${width/2 - 60}px; width:120px; top:${boardY + boardH + 15}px; right:auto;`;
-          muteBtn.style.cssText       = "bottom:15px; left:15px;";
-          const hintTitle = controlsHint.querySelector(".label");
-          if (hintTitle) hintTitle.innerText = "CONTROLES";
-          const hints = controlsHint.querySelectorAll(".hint-item");
-          if (hints[0]) hints[0].innerText = "TAP: PAUSE";
+          // Atribuição direta evita acúmulo de propriedades duplicadas via +=
+          scoreBoard.style.left   = `${width / 2 - 75}px`;
+          scoreBoard.style.width  = "150px";
+          scoreBoard.style.top    = `${boardY - 70}px`;
+          scoreBoard.style.right  = "auto";
+
+          controlsHint.style.left  = `${width / 2 - 60}px`;
+          controlsHint.style.width = "120px";
+          controlsHint.style.top   = `${boardY + boardH + 15}px`;
+          controlsHint.style.right = "auto";
+
+          muteBtn.style.bottom = "15px";
+          muteBtn.style.left   = "15px";
+
+          if (hintTitle) hintTitle.textContent = "CONTROLES";
+          if (hints[0]) hints[0].textContent = "TAP: PAUSE";
           if (hints[1]) hints[1].style.display = "none";
         } else {
-          scoreBoard.style.cssText   += `left:${boardX - 150}px; width:auto; top:${boardY + boardH/2 - 40}px; right:auto;`;
-          controlsHint.style.cssText += `right:${width - (boardX + boardW) - 150}px; top:${boardY + boardH/2 - 60}px; width:120px; left:auto;`;
-          muteBtn.style.cssText       = "bottom:20px; left:20px;";
-          const hintTitle = controlsHint.querySelector(".label");
-          if (hintTitle) hintTitle.innerText = "DICAS";
-          const hints = controlsHint.querySelectorAll(".hint-item");
-          if (hints[0]) hints[0].innerText = "SETAS / WASD";
+          scoreBoard.style.left   = `${boardX - 150}px`;
+          scoreBoard.style.width  = "auto";
+          scoreBoard.style.top    = `${boardY + boardH / 2 - 40}px`;
+          scoreBoard.style.right  = "auto";
+
+          controlsHint.style.right = `${width - (boardX + boardW) - 150}px`;
+          controlsHint.style.top   = `${boardY + boardH / 2 - 60}px`;
+          controlsHint.style.width = "120px";
+          controlsHint.style.left  = "auto";
+
+          muteBtn.style.bottom = "20px";
+          muteBtn.style.left   = "20px";
+
+          if (hintTitle) hintTitle.textContent = "DICAS";
+          if (hints[0]) hints[0].textContent = "SETAS / WASD";
           if (hints[1]) {
-            hints[1].innerText = "ESPAÇO: PAUSE";
+            hints[1].textContent   = "ESPAÇO: PAUSE";
             hints[1].style.display = "";
           }
         }
@@ -1183,12 +1203,17 @@
         },
       };
 
+      let _skinsLoadedCount = 0;
       assets.skins.forEach((img, i) => {
         const name = i === 4 ? "SnakeBonus.PNG"
                    : i === 5 ? "SnakeGift.png"
                    : (i === 0 ? "Snake" : `Snake${i}`) + ".PNG";
         img.src = `assets/SnakeAssets/Imagens/${name}`;
-        img.onload = () => { if (i === 0) assets.isLoaded = true; updateSkinUI(); };
+        img.onload = () => {
+          if (i === 0) assets.isLoaded = true;
+          if (++_skinsLoadedCount === assets.skins.length) updateSkinUI();
+        };
+        img.onerror = () => { if (++_skinsLoadedCount === assets.skins.length) updateSkinUI(); };
       });
 
       assets.planets.forEach((img, i) => {
@@ -1201,7 +1226,7 @@
       let isMuted = false;
       function toggleMute() {
         isMuted = !isMuted;
-        document.getElementById("mute-btn").innerText = isMuted ? "🔇" : "🔊";
+        document.getElementById("mute-btn").textContent = isMuted ? "🔇" : "🔊";
       }
       function playSfx(key) {
         if (isMuted) return;
@@ -1209,16 +1234,18 @@
         if (snd) { snd.currentTime = 0; snd.play().catch(() => {}); }
       }
 
+      let _toastTimeout = null;
+
       function showToast(msg, isError = false) {
         const toast = document.getElementById("toast");
         if (!toast) return;
-        toast.innerText = msg.replace(/\s+/g, " ").trim();
+        toast.textContent = msg.replace(/\s+/g, " ").trim();
         toast.classList.remove("show", "error");
         if (isError) toast.classList.add("error");
         void toast.offsetWidth; // force reflow
         toast.classList.add("show");
-        if (toast._timeout) clearTimeout(toast._timeout);
-        toast._timeout = setTimeout(() => toast.classList.remove("show"), 5000);
+        if (_toastTimeout) clearTimeout(_toastTimeout);
+        _toastTimeout = setTimeout(() => toast.classList.remove("show"), 5000);
       }
 
       /** Troca entre seções no menu (main, controls, ranking) com animação. */
@@ -1381,12 +1408,14 @@
           this.timeSinceLastMove = 0;
           this.moveInterval = CONFIG.baseSpeed;
 
-          const saved = localStorage.getItem("snake_highscores");
-          if (saved) this.highScores = JSON.parse(saved);
+        const saved = localStorage.getItem("snake_highscores");
+        if (saved) {
+          try { this.highScores = JSON.parse(saved); } catch { this.highScores = []; }
+        }
 
           for (let i = 0; i < 3; i++) this.spawnPlanet();
 
-          document.getElementById("score-value").innerText = 0;
+        document.getElementById("score-value").textContent = 0;
           document.getElementById("game-over-overlay").style.display = "none";
           document.getElementById("pause-overlay").style.display = "none";
 
@@ -1508,7 +1537,7 @@
 
           if (this.snake.length >= CONFIG.cols * CONFIG.rows) { this.victory(); return; }
 
-          document.getElementById("score-value").innerText = this.score;
+          document.getElementById("score-value").textContent = this.score;
         },
 
         /** Lógica compartilhada por endGame e victory. */
@@ -1516,9 +1545,9 @@
           this.gameOver = true;
           const overlay = document.getElementById("game-over-overlay");
           const h1      = overlay.querySelector("h1");
-          h1.innerText  = title;
+          h1.textContent  = title;
           h1.style.color = titleColor;
-          document.getElementById("final-score").innerText = this.score;
+          document.getElementById("final-score").textContent = this.score;
           overlay.style.display = "flex";
 
           let isRecord = false;
@@ -1586,8 +1615,9 @@
             const curr = this.snake[index];
             const prev = this.prevSnake[index] || curr;
             let px = prev.x, py = prev.y, cx = curr.x, cy = curr.y;
-            if (Math.abs(cx - px) > 1) { cx > px ? px += CONFIG.cols : cx += CONFIG.cols; }
-            if (Math.abs(cy - py) > 1) { cy > py ? py += CONFIG.rows : cy += CONFIG.rows; }
+            // Corrige wrapping: ajusta a coordenada "menor" para manter direção contínua
+            if (Math.abs(cx - px) > 1) { cx < px ? cx += CONFIG.cols : px += CONFIG.cols; }
+            if (Math.abs(cy - py) > 1) { cy < py ? cy += CONFIG.rows : py += CONFIG.rows; }
             return {
               x: boardX + (px + (cx - px) * progress) * CONFIG.gridSize + CONFIG.gridSize / 2,
               y: boardY + (py + (cy - py) * progress) * CONFIG.gridSize + CONFIG.gridSize / 2,
@@ -1696,6 +1726,8 @@
       // INPUT — TECLADO
       // =========================================================================
       window.addEventListener("keydown", (e) => {
+        // Previne espaço de acionar botão com foco enquanto joga
+        if (e.key === " " && e.target.tagName === "BUTTON") e.preventDefault();
         if ([" ", "p", "P", "Escape"].includes(e.key)) {
           if (Game.isPlaying && !Game.gameOver) { Game.togglePause(); return; }
         }
@@ -1707,7 +1739,10 @@
           ArrowRight: {x:1,y:0}, d:{x:1,y:0}, D:{x:1,y:0},
         };
         const dir = DIR_MAP[e.key];
-        if (dir) Game.addInput(dir);
+        if (dir) {
+          e.preventDefault(); // Evita scroll da página com setas
+          Game.addInput(dir);
+        }
       });
 
       // =========================================================================
@@ -1874,7 +1909,7 @@
         if (window.fetchGlobalScores) scores = await window.fetchGlobalScores();
         if (!scores.length) {
           const saved = localStorage.getItem("snake_highscores");
-          scores = saved ? JSON.parse(saved) : [];
+          scores = saved ? (() => { try { return JSON.parse(saved); } catch { return []; } })() : [];
         }
 
         const localId = String(localStorage.getItem("snake_player_id"));
@@ -1911,6 +1946,9 @@
 
       async function saveScore() {
         const nameInput = document.getElementById("player-name-input");
+        const saveBtn   = document.querySelector("#high-score-section .btn");
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "Enviando..."; }
+
         const name = nameInput.value.trim().toUpperCase() || "ANON";
         showToast("Enviando para o universo...");
 
@@ -1932,6 +1970,9 @@
         }
 
         document.getElementById("high-score-section").style.display = "none";
+        nameInput.value        = "";
+        nameInput.style.display = "none";
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "Salvar Recorde"; }
         updateHighScoresUI();
       }
 
@@ -1964,7 +2005,7 @@
       // GAME LOOP
       // =========================================================================
       function loop(timestamp) {
-        const deltaTime = timestamp - lastTime || 0;
+        const deltaTime = Math.min(timestamp - (lastTime || timestamp), 200); // limita a 200ms para evitar spike ao retornar de aba
         lastTime = timestamp;
 
         frameCount++;
@@ -1972,7 +2013,7 @@
           currentFps  = frameCount;
           frameCount  = 0;
           fpsLastTime = timestamp;
-          document.getElementById("debug-info").innerText = `FPS: ${currentFps}`;
+          document.getElementById("debug-info").textContent = `FPS: ${currentFps}`;
         }
 
         drawBackground();
@@ -2005,12 +2046,12 @@
           localStorage.setItem("snake_player_id", playerId);
         }
         const idEl = document.getElementById("player-id-display");
-        if (idEl) idEl.innerText = "ID " + playerId;
+        if (idEl) idEl.textContent = "ID " + playerId;
 
         // Carrega highscores locais imediatamente
-        const saved = localStorage.getItem("snake_highscores");
-        if (saved) {
-          Game.highScores = JSON.parse(saved);
+        const savedScores = localStorage.getItem("snake_highscores");
+        if (savedScores) {
+          try { Game.highScores = JSON.parse(savedScores); } catch { Game.highScores = []; }
           if (Game.highScores.length > 0) {
             Game.isChampion = String(Game.highScores[0].playerId) === String(playerId);
             updateSkinUI();
@@ -2018,9 +2059,11 @@
         }
 
         // Busca dados globais (ranking + presentes) em paralelo
+        let _globalRetries = 0;
         const checkGlobal = async () => {
           if (!window.fetchGlobalScores || !window.checkPendingGifts) {
-            setTimeout(checkGlobal, 500); // Firebase ainda carregando
+            if (++_globalRetries > 20) { console.warn("Firebase não carregou após 10s."); return; }
+            setTimeout(checkGlobal, 500);
             return;
           }
           try {
@@ -2036,7 +2079,7 @@
 
             if (gift) {
               currentGift = gift;
-              document.getElementById("present-msg").innerText = `"${gift.message}"`;
+              document.getElementById("present-msg").textContent = `"${gift.message}"`;
               document.getElementById("present-overlay").style.display = "flex";
               playSfx("bonus");
             }
