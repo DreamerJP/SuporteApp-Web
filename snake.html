@@ -199,6 +199,13 @@
         text-align: right;
       }
 
+      #pause-title {
+        color: white;
+        font-size: 48px;
+        text-shadow: 0 0 20px cyan;
+        letter-spacing: 5px;
+      }
+
       /* =====================================================================
          ANIMATIONS
       ===================================================================== */
@@ -221,6 +228,15 @@
       @keyframes goldPulse {
         0%, 100% { box-shadow: 0 0 5px rgba(255,215,0,0.4); }
         50%       { box-shadow: 0 0 20px rgba(255,215,0,0.8); }
+      }
+
+      #high-scores-display h3 {
+        font-family: "Orbitron", sans-serif;
+        color: #00ffcc;
+        font-size: 16px;
+        letter-spacing: 3px;
+        margin: 20px 0 5px;
+        opacity: 0.9;
       }
 
       /* =====================================================================
@@ -675,7 +691,7 @@
 
     <!-- Pause Overlay -->
     <div id="pause-overlay">
-      <h1 style="color:white; font-size:48px; text-shadow:0 0 20px cyan; letter-spacing:5px;">PAUSADO</h1>
+      <h1 id="pause-title">PAUSADO</h1>
     </div>
 
     <!-- Present Overlay -->
@@ -782,7 +798,7 @@
         <div id="high-score-section" style="display:none">
           <p style="color:#ffd700; margin:10px 0">🌟 NOVO RECORDE! 🌟</p>
           <input type="text" id="player-name-input" placeholder="Digite seu nome" maxlength="10" />
-          <button class="btn" onclick="saveScore()">Salvar Recorde</button>
+          <button id="save-score-btn" class="btn" onclick="saveScore()">Salvar Recorde</button>
         </div>
         <div id="high-scores-display">
           <h3>🏆 Melhores Pilotos</h3>
@@ -981,10 +997,15 @@
           this.color = color;
           this.size = Math.random() * 3 + 1;
         }
-        update() { this.x += this.vx; this.y += this.vy; this.alpha -= 0.02; }
+        update(deltaTime) {
+          const dt = deltaTime / 16.67; // normaliza para ~60fps
+          this.x     += this.vx * dt;
+          this.y     += this.vy * dt;
+          this.alpha -= 0.02 * dt;
+        }
         draw(ctx) {
           ctx.save();
-          ctx.globalAlpha = this.alpha;
+          ctx.globalAlpha = Math.max(0, this.alpha);
           ctx.fillStyle = this.color;
           ctx.shadowBlur = 10;
           ctx.shadowColor = this.color;
@@ -1006,26 +1027,28 @@
           this.twinkling = false;
           this.twinkleFactor = 0;
           this.twinkleSpeed = 0;
-          this.nextTwinkleTime = Math.random() * 200;
+          this.nextTwinkleMs = (Math.random() * 200) * 16.67; // convert frames→ms
         }
-        update() {
+        update(deltaTime) {
           if (this.twinkling) {
-            this.twinkleFactor += this.twinkleSpeed;
+            this.twinkleFactor += this.twinkleSpeed * (deltaTime / 16.67);
             this.opacity = this.baseOpacity + Math.sin(this.twinkleFactor) * 1.0;
             if (this.twinkleFactor > Math.PI) {
               this.twinkling = false;
               this.opacity = this.baseOpacity;
-              this.nextTwinkleTime = Math.random() * 300 + 200;
+              this.nextTwinkleMs = (Math.random() * 300 + 200) * 16.67;
             }
           } else {
-            this.nextTwinkleTime--;
-            if (this.nextTwinkleTime <= 0) {
-              if (Math.random() > 0.97) {
+            this.nextTwinkleMs -= deltaTime;
+            if (this.nextTwinkleMs <= 0) {
+              // Aumentamos a chance para 5% a cada intervalo para o fundo ficar mais vivo
+              if (Math.random() > 0.95) {
                 this.twinkling = true;
                 this.twinkleFactor = 0;
                 this.twinkleSpeed = 0.02 + Math.random() * 0.05;
               } else {
-                this.nextTwinkleTime = 80;
+                // Intervalo aleatório menor para checagem (entre ~0.5s e ~1.3s)
+                this.nextTwinkleMs = (Math.random() * 50 + 30) * 16.67;
               }
             }
           }
@@ -1040,11 +1063,11 @@
 
       const stars = Array.from({ length: CONFIG.starCount }, () => new Star());
 
-      function drawBackground() {
+      function drawBackground(deltaTime) {
         ctx.clearRect(0, 0, width, height);
         ctx.save();
         ctx.translate(boardX, boardY);
-        stars.forEach(s => { s.update(); s.draw(ctx); });
+        stars.forEach(s => { s.update(deltaTime); s.draw(ctx); });
         ctx.strokeStyle = CONFIG.colors.boardBorder;
         ctx.lineWidth = 3;
         ctx.shadowBlur = 20;
@@ -1130,17 +1153,28 @@
       class Boost {
         constructor(x, y, type) {
           this.x = x; this.y = y; this.type = type;
-          this.radius = CONFIG.gridSize / 2;
-          this.pulse = 0;
-          this.lifetime = type === "speed" ? 10000 : 15000;
+          this.radius   = CONFIG.gridSize / 2;
+          this.pulse    = 0;
+          this.lifetime      = type === "speed" ? 10000 : 15000;
+          this._blinkTimer   = 0;
+          this._blinkVisible = true;
         }
         update(deltaTime) {
           this.pulse += 0.1;
           if (this.lifetime !== Infinity) this.lifetime -= deltaTime;
+          // Pisca quando prestes a expirar (toggle a cada 100ms)
+          if (this.lifetime < 3000) {
+            this._blinkTimer += deltaTime;
+            if (this._blinkTimer >= 100) {
+              this._blinkVisible = !this._blinkVisible;
+              this._blinkTimer   = 0;
+            }
+          } else {
+            this._blinkVisible = true;
+          }
         }
         draw(ctx) {
-          // Pisca quando prestes a expirar
-          if (this.lifetime < 3000 && Math.floor(Date.now() / 100) % 2 === 0) return;
+          if (!this._blinkVisible) return;
 
           const screenX = boardX + this.x * CONFIG.gridSize + CONFIG.gridSize / 2;
           const screenY = boardY + this.y * CONFIG.gridSize + CONFIG.gridSize / 2;
@@ -1250,9 +1284,9 @@
 
       /** Troca entre seções no menu (main, controls, ranking) com animação. */
       function showSection(id) {
-        ["main-menu-content", "controls-menu-content", "ranking-menu-content"].forEach(sid => {
-          const el = document.getElementById(sid);
-          if (!el) return;
+        document.querySelectorAll(
+          "#main-menu-content, #controls-menu-content, #ranking-menu-content"
+        ).forEach(el => {
           el.style.display = "none";
           el.classList.remove("animate-fade");
         });
@@ -1261,6 +1295,7 @@
         target.style.display = "block";
         void target.offsetWidth;
         target.classList.add("animate-fade");
+        if (id === "controls-menu-content") _onShowControls();
       }
 
       /** Formata timestamp do Firestore ou Date para pt-BR */
@@ -1397,27 +1432,22 @@
           this.snake     = [{ x:10, y:10 }, { x:9, y:10 }, { x:8, y:10 }];
           this.prevSnake = this.snake.map(s => ({ ...s }));
           this.direction = { x: 1, y: 0 };
-          this.inputQueue   = [];
-          this.score        = 0;
-          this.gameOver     = false;
-          this.isPaused     = false;
-          this.planets      = [];
-          this.boosts       = [];
-          this.particles    = [];
-          this.activeBoosts = { speed: 0, immortal: 0 };
+          this.inputQueue        = [];
+          this.score             = 0;
+          this.gameOver          = false;
+          this.isPaused          = false;
+          this.planets           = [];
+          this.boosts            = [];
+          this.particles         = [];
+          this.activeBoosts      = { speed: 0, immortal: 0 };
           this.timeSinceLastMove = 0;
-          this.moveInterval = CONFIG.baseSpeed;
-
-        const saved = localStorage.getItem("snake_highscores");
-        if (saved) {
-          try { this.highScores = JSON.parse(saved); } catch { this.highScores = []; }
-        }
+          this.moveInterval      = CONFIG.baseSpeed;
 
           for (let i = 0; i < 3; i++) this.spawnPlanet();
 
-        document.getElementById("score-value").textContent = 0;
+          document.getElementById("score-value").textContent        = 0;
           document.getElementById("game-over-overlay").style.display = "none";
-          document.getElementById("pause-overlay").style.display = "none";
+          document.getElementById("pause-overlay").style.display     = "none";
 
           const isMobile = window.innerWidth < 1000;
           document.getElementById("dpad-container").style.display =
@@ -1461,7 +1491,7 @@
           if (!this.isPaused) {
             this.planets.forEach(p => p.update());
             this.boosts.forEach(b => b.update(deltaTime));
-            this.particles.forEach(p => p.update());
+            this.particles.forEach(p => p.update(deltaTime));
             this.boosts    = this.boosts.filter(b => b.lifetime > 0);
             this.particles = this.particles.filter(p => p.alpha > 0);
           }
@@ -1726,6 +1756,9 @@
       // INPUT — TECLADO
       // =========================================================================
       window.addEventListener("keydown", (e) => {
+        // Se estiver digitando em um input, não processa comandos de jogo
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
         // Previne espaço de acionar botão com foco enquanto joga
         if (e.key === " " && e.target.tagName === "BUTTON") e.preventDefault();
         if ([" ", "p", "P", "Escape"].includes(e.key)) {
@@ -1876,11 +1909,14 @@
       }
 
       function goToMenu() {
-        document.getElementById("game-over-overlay").style.display     = "none";
-        document.getElementById("start-screen-overlay").style.display  = "flex";
-        document.getElementById("dpad-container").style.display         = "none";
+        document.getElementById("game-over-overlay").style.display       = "none";
+        document.getElementById("start-screen-overlay").style.display    = "flex";
+        document.getElementById("dpad-container").style.display           = "none";
         document.getElementById("split-controls-container").style.display = "none";
         Game.isPlaying = false;
+        Game.gameOver  = false;
+        showSection("main-menu-content");
+        loadMenuRanking();
       }
 
       function setControlMode(mode) {
@@ -1900,6 +1936,22 @@
         if (sel) sel.classList.add("selected");
       }
 
+      /**
+       * Verifica se o jogador local está no topo do ranking e atualiza o estado de campeão.
+       * @param {Array} scores – array de { name, score, playerId }
+       */
+      function _updateChampionState(scores) {
+        if (!scores.length) return;
+        const localId     = String(localStorage.getItem("snake_player_id"));
+        const wasChampion = Game.isChampion;
+        Game.isChampion   = String(scores[0].playerId) === localId;
+        if (Game.isChampion && !wasChampion) {
+          showToast("🏆 VOCÊ É O NOVO LÍDER MUNDIAL! SKIN DOURADA LIBERADA!", false);
+          playSfx("victory");
+        }
+        updateSkinUI();
+      }
+
       // Carrega o ranking global para o menu
       async function loadMenuRanking() {
         const list = document.getElementById("menu-high-scores-list");
@@ -1912,14 +1964,7 @@
           scores = saved ? (() => { try { return JSON.parse(saved); } catch { return []; } })() : [];
         }
 
-        const localId = String(localStorage.getItem("snake_player_id"));
-        const wasChampion = Game.isChampion;
-        Game.isChampion = scores.length > 0 && String(scores[0].playerId) === localId;
-        if (Game.isChampion && !wasChampion) {
-          showToast("🏆 VOCÊ É O NOVO LÍDER MUNDIAL! SKIN DOURADA LIBERADA!", false);
-          playSfx("victory");
-        }
-        updateSkinUI();
+        _updateChampionState(scores);
         renderScoreList(list, scores);
       }
 
@@ -1933,20 +1978,13 @@
           if (global.length > 0) scores = global;
         }
 
-        const localId      = String(localStorage.getItem("snake_player_id"));
-        const wasChampion  = Game.isChampion;
-        Game.isChampion    = scores.length > 0 && String(scores[0].playerId) === localId;
-        if (Game.isChampion && !wasChampion) {
-          showToast("🏆 INCRÍVEL! VOCÊ ATINGIU O TOPO DO MUNDO! SKIN DOURADA LIBERADA!", false);
-          playSfx("victory");
-        }
-        updateSkinUI();
+        _updateChampionState(scores);
         renderScoreList(list, scores, { compact: true });
       }
 
       async function saveScore() {
         const nameInput = document.getElementById("player-name-input");
-        const saveBtn   = document.querySelector("#high-score-section .btn");
+        const saveBtn   = document.getElementById("save-score-btn");
         if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "Enviando..."; }
 
         const name = nameInput.value.trim().toUpperCase() || "ANON";
@@ -2004,8 +2042,10 @@
       // =========================================================================
       // GAME LOOP
       // =========================================================================
+      let _rafId = null;
+
       function loop(timestamp) {
-        const deltaTime = Math.min(timestamp - (lastTime || timestamp), 200); // limita a 200ms para evitar spike ao retornar de aba
+        const deltaTime = Math.min(timestamp - (lastTime || timestamp), 200);
         lastTime = timestamp;
 
         frameCount++;
@@ -2016,10 +2056,16 @@
           document.getElementById("debug-info").textContent = `FPS: ${currentFps}`;
         }
 
-        drawBackground();
+        drawBackground(deltaTime);
         Game.update(deltaTime);
         Game.draw(ctx);
-        requestAnimationFrame(loop);
+        _rafId = requestAnimationFrame(loop);
+      }
+
+      function startLoop() {
+        if (_rafId) return;
+        lastTime = performance.now();
+        _rafId = requestAnimationFrame(loop);
       }
 
       // =========================================================================
@@ -2092,7 +2138,7 @@
       }
 
       initApp();
-      requestAnimationFrame(loop);
+      startLoop();
     </script>
   </body>
 </html>
