@@ -388,7 +388,7 @@
 
     /* ─── Popup Layout Mode ──────────────────────────────────────────────────── */
     body.popup-layout #app-header { display: none; }
-    body.popup-layout #app-main { flex-direction: column; height: 100vh; }
+    body.popup-layout #app-main { display: block !important; height: 100vh; overflow-y: auto; }
 
     body.popup-layout #sidebar {
       width: 100%;
