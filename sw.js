@@ -1,4 +1,4 @@
-// SuporteApp Web - Service Worker (Atualizado em: 2026-05-05 20:05:00)
+// SuporteApp Web - Service Worker (Atualizado em: 2026-05-07 15:08:00)
 // A versão é gerenciada no manifest.json
 let CACHE_NAME = "suporteapp-cache"; // fallback genérico
 let APP_VERSION = "dev"; // fallback genérico
@@ -8,7 +8,7 @@ async function loadVersion() {
   try {
     const manifestResponse = await fetch("./manifest.json");
     const manifest = await manifestResponse.json();
-    APP_VERSION = manifest.version || "dev";
+    APP_VERSION = manifest.version || "4.0.1";
     CACHE_NAME = `suporteapp-v${APP_VERSION}`;
     console.log(`[SW] Versão carregada: ${APP_VERSION}`);
   } catch (err) {
