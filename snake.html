@@ -1250,18 +1250,19 @@ function resize() {
     c.style.width = W + "px"; c.style.height = H + "px";
     c.getContext("2d").setTransform(dpr,0,0,dpr,0,0);
   });
-  // grid size responsive
-  if (isMobile) {
-    const byW = Math.floor((W - 32) / CFG.cols);
-    const byH = Math.floor((H - 160) / CFG.rows);
-    CFG.gridSize = Math.max(14, Math.min(byW, byH, 28));
-  } else {
-    CFG.gridSize = 30;
-  }
+
+  const reservedH = isMobile ? 180 : 140;
+  const byW = Math.floor((W - 48) / CFG.cols);
+  const byH = Math.floor((H - reservedH) / CFG.rows);
+  
+  CFG.gridSize = Math.max(14, Math.min(byW, byH, isMobile ? 28 : 30));
+
   boardW = CFG.cols * CFG.gridSize;
   boardH = CFG.rows * CFG.gridSize;
   boardX = (W - boardW) / 2;
-  boardY = (H - boardH) / 2;
+  
+  const minY = 90;
+  boardY = Math.max(minY, (H - boardH) / 2);
   positionHud();
   try { if (Game.playing) UI.repositionHelper(); } catch(e) {}
 }

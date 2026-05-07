@@ -2,7 +2,7 @@
   "name": "SuporteApp Web",
   "short_name": "SuporteApp",
   "description": "Ferramenta avançada para auxílio ao suporte técnico com scripts de texto e abertura de IPs.",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "id": "suporteapp-web",
   "start_url": "./index.html",
   "scope": "./",
