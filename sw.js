@@ -1,4 +1,4 @@
-// SuporteApp Web - Service Worker (Atualizado em: 2026-05-07 15:18:00)
+// SuporteApp Web - Service Worker (Atualizado em: 2026-05-26 16:20:00)
 // A versão é gerenciada no manifest.json
 let CACHE_NAME = "suporteapp-cache"; // fallback genérico
 let APP_VERSION = "dev"; // fallback genérico
@@ -8,7 +8,7 @@ async function loadVersion() {
   try {
     const manifestResponse = await fetch("./manifest.json");
     const manifest = await manifestResponse.json();
-    APP_VERSION = manifest.version || "4.0.2";
+    APP_VERSION = manifest.version || "4.0.3";
     CACHE_NAME = `suporteapp-v${APP_VERSION}`;
     console.log(`[SW] Versão carregada: ${APP_VERSION}`);
   } catch (err) {
@@ -27,6 +27,9 @@ const urlsToCache = [
   "./assets/SuporteApp-Assets/ScreenShots2.png",
   "./assets/SuporteApp-Assets/ScreenShotsDesktop.png",
   "./texts.json",
+  "./snake.html",
+  "./assets/SnakeAssets/snake.css",
+  "./assets/SnakeAssets/snake.js",
 ];
 
 // Instalação - Cacheia os recursos essenciais
