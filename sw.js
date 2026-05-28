@@ -1,4 +1,4 @@
-// SuporteApp Web - Service Worker (Atualizado em: 2026-05-26 16:20:00)
+// SuporteApp Web - Service Worker (Atualizado em: 2026-05-28 17:20:00)
 // A versão é gerenciada no manifest.json
 let CACHE_NAME = "suporteapp-cache"; // fallback genérico
 let APP_VERSION = "dev"; // fallback genérico
