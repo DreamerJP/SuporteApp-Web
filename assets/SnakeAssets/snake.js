@@ -29,7 +29,8 @@ let isMobile = false;
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  W = window.innerWidth; H = window.innerHeight;
+  W = document.documentElement.clientWidth  || window.innerWidth;
+  H = document.documentElement.clientHeight || window.innerHeight;
   isMobile = W < 960;
   [bgCanvas, canvas].forEach(c => {
     c.width = W * dpr; c.height = H * dpr;
@@ -149,7 +150,7 @@ class Particle {
     ctx.save();
     ctx.globalAlpha = Math.max(0, this.alpha);
     ctx.fillStyle = this.color;
-    ctx.shadowBlur = 8; ctx.shadowColor = this.color;
+    if (this.alpha > 0.4) { ctx.shadowBlur = 5; ctx.shadowColor = this.color; }
     ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
     ctx.restore();
   }
@@ -235,8 +236,7 @@ function drawBackground(dt) {
   bgCtx.drawImage(nebulaCanvas, 0, 0);
   // stars (original twinkle system)
   stars.forEach(s => { s.update(dt); s.draw(bgCtx); });
-  // board border — subtle line with tiny inner glow + corner marks
-  bgCtx.shadowBlur = 8;
+  bgCtx.shadowBlur = 4;
   bgCtx.shadowColor = 'rgba(0,255,204,0.35)';
   bgCtx.strokeStyle = 'rgba(0,255,204,0.55)';
   bgCtx.lineWidth = 1;
@@ -1134,6 +1134,14 @@ window.addEventListener("click", e => {
    GAME LOOP
 ═══════════════════════════════════════════════════════════════ */
 let lastTime=0, frameCount=0, fpsLast=0, fps=0, rafId=null;
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  } else {
+    if (!rafId) { lastTime = performance.now(); rafId = requestAnimationFrame(loop); }
+  }
+});
 
 function loop(ts) {
   const dt = Math.min(ts-(lastTime||ts), 200);
