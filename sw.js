@@ -8,7 +8,7 @@ async function loadVersion() {
   try {
     const manifestResponse = await fetch("./manifest.json");
     const manifest = await manifestResponse.json();
-    APP_VERSION = manifest.version || "4.0.6";
+    APP_VERSION = manifest.version || "4.0.7";
     CACHE_NAME = `suporteapp-v${APP_VERSION}`;
     console.log(`[SW] Versão carregada: ${APP_VERSION}`);
   } catch (err) {
