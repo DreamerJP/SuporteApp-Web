@@ -26,6 +26,7 @@ const canvas    = document.getElementById("game-canvas");
 const ctx       = canvas.getContext("2d");
 let W, H, boardX, boardY, boardW, boardH;
 let isMobile = false;
+let starsReady = false;
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
@@ -52,10 +53,8 @@ function resize() {
   boardY = Math.max(minY, (H - boardH) / 2);
 
   // Redistribute stars & nebulae when the board area changes
-  if (typeof stars !== "undefined" && stars) {
+  if (starsReady) {
     stars.forEach(s => s.reset());
-  }
-  if (typeof buildNebulae === "function") {
     buildNebulae();
   }
 
@@ -236,6 +235,7 @@ function buildNebulae() {
   }
 }
 buildNebulae();
+starsReady = true;
 
 function drawBackground(dt) {
   bgCtx.clearRect(0, 0, W, H);
