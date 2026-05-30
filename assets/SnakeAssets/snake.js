@@ -50,6 +50,15 @@ function resize() {
   
   const minY = 90;
   boardY = Math.max(minY, (H - boardH) / 2);
+
+  // Redistribute stars & nebulae when the board area changes
+  if (typeof stars !== "undefined" && stars) {
+    stars.forEach(s => s.reset());
+  }
+  if (typeof buildNebulae === "function") {
+    buildNebulae();
+  }
+
   positionHud();
   try { if (Game.playing) UI.repositionHelper(); } catch(e) {}
 }
@@ -268,7 +277,6 @@ const BOOST_COLORS = { speed:"#00dcff", immortal:"#ffd700", score:"#ff66cc" };
 class Planet {
   constructor(x, y, type) {
     this.x = x; this.y = y; this.type = type;
-    this.r = CFG.gridSize / 2 - 2;
     this.rot = Math.random() * Math.PI * 2;
     this.rotSpeed = (Math.random() - 0.5) * 0.003;
     this.pulsePhase = Math.random() * Math.PI * 2;
@@ -281,7 +289,8 @@ class Planet {
   draw(ctx) {
     const cx = boardX + this.x * CFG.gridSize + CFG.gridSize/2;
     const cy = boardY + this.y * CFG.gridSize + CFG.gridSize/2;
-    const r  = this.r + Math.sin(this.pulsePhase) * 1.5;
+    const baseR = CFG.gridSize / 2 - 2;
+    const r  = baseR + Math.sin(this.pulsePhase) * 1.5;
     const img = Assets.planets[this.type % Assets.planets.length];
     const baseCol = PLANET_COLS[this.type % PLANET_COLS.length];
     const solidCol = baseCol.replace(/[\d.]+\)$/, '0.95)');
