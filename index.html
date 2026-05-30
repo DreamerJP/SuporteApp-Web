@@ -859,6 +859,10 @@
     #confirm-modal .modal-actions { justify-content: center; }
 
     /* Easter Egg Modal */
+    #easter-egg-modal {
+      backdrop-filter: none !important;
+      background: rgba(10, 10, 15, 0.98);
+    }
     #easter-egg-modal .modal {
       max-width: 980px;
       width: 95vw;
@@ -869,6 +873,12 @@
       box-shadow: 0 0 50px rgba(0, 255, 204, 0.25);
       display: flex;
       flex-direction: column;
+      backdrop-filter: none !important;
+    }
+
+    body.easter-egg-active #app-header,
+    body.easter-egg-active #app-main {
+      display: none !important;
     }
 
     .easter-header {
@@ -2329,12 +2339,14 @@
     // ─── Easter Egg ───────────────────────────────────────────────────────────────
     function openEasterEgg() {
       clearSearch();
+      document.body.classList.add("easter-egg-active");
       document.getElementById("easter-egg-frame").src = "snake.html";
       document.getElementById("easter-egg-modal").classList.add("active");
       showToast("🌌 Conexão espacial estabelecida...");
     }
 
     function closeEasterEgg() {
+      document.body.classList.remove("easter-egg-active");
       document.getElementById("easter-egg-frame").src = "";
       document.getElementById("easter-egg-modal").classList.remove("active");
     }
