@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SuporteApp — Configurações</title>
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/options.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <header class="page-header">
+      <img src="icons/icon-192.png" alt="" />
+      <div>
+        <h1>SuporteApp</h1>
+        <p>Configurações da extensão</p>
+      </div>
+    </header>
+
+    <div class="columns">
+
+    <div class="col-main">
+
+    <!-- ─── Textos ─────────────────────────────────────────────────────── -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Textos</h2>
+        <div class="card-actions">
+          <button id="btn-reorder" class="ghost" title="Arraste os textos para mudar a ordem">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polyline points="8 7 12 3 16 7"/><polyline points="8 17 12 21 16 17"/>
+              <line x1="12" y1="3" x2="12" y2="21"/>
+            </svg>
+            Reorganizar
+          </button>
+          <button id="btn-new-text" class="accent">
+            <svg class="icon" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Novo texto
+          </button>
+        </div>
+      </div>
+      <div id="cat-filter"></div>
+      <div id="texts-list"></div>
+    </section>
+
+    </div><!-- /col-main -->
+
+    <div class="col-side">
+
+    <!-- ─── Fonte de textos (URL) ──────────────────────────────────────── -->
+    <section class="card">
+      <h2>Fonte de textos</h2>
+      <p class="hint">Carregue uma lista de textos centralizada (JSON) para toda a equipe.</p>
+      <div class="row">
+        <input type="url" id="json-url-input" placeholder="https://exemplo.com/textos.json" />
+        <button id="btn-load-url" class="accent">Carregar</button>
+      </div>
+    </section>
+
+    <!-- ─── Portas IP ──────────────────────────────────────────────────── -->
+    <section class="card">
+      <h2>Portas IP</h2>
+      <p class="hint">Além de HTTP/HTTPS, as portas abaixo são abertas junto com o IP.</p>
+      <div id="ports-list" class="tag-list"></div>
+      <div class="row" style="margin-top:10px;">
+        <input type="number" id="new-port-input" placeholder="ex: 8080" min="1" max="65535" />
+        <button id="btn-add-port">Adicionar</button>
+      </div>
+    </section>
+
+    <!-- ─── Otimização OPA ─────────────────────────────────────────────── -->
+    <section class="card">
+      <h2>Otimização OPA</h2>
+      <label class="toggle-row">
+        <span>Ativar otimização ao copiar</span>
+        <input type="checkbox" class="toggle" id="opa-toggle" />
+      </label>
+      <div id="opa-extra-controls" style="margin-top:12px;">
+        <p class="hint">Linhas extras por quebra: <strong id="opa-lines-val">1</strong></p>
+        <input type="range" id="opa-lines" min="0" max="5" value="1" />
+      </div>
+    </section>
+
+    <!-- ─── Aparência ──────────────────────────────────────────────────── -->
+    <section class="card">
+      <h2>Aparência</h2>
+      <div class="color-row">
+        <div class="color-item">
+          <label>Fundo</label>
+          <input type="color" id="bg-color" />
+        </div>
+        <div class="color-item">
+          <label>Destaque</label>
+          <input type="color" id="accent-color" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button id="btn-save-theme" class="accent" style="flex:1;">Aplicar</button>
+        <button id="btn-reset-theme" style="flex:1;">Restaurar padrão</button>
+      </div>
+    </section>
+
+    <!-- ─── Backup ─────────────────────────────────────────────────────── -->
+    <section class="card">
+      <h2>Backup &amp; Dados</h2>
+      <p class="hint">Compatível com o backup completo do SuporteApp Web.</p>
+      <div class="row">
+        <button id="btn-import-full" style="flex:1;">Importar backup</button>
+        <button id="btn-export-full" style="flex:1;">Exportar backup</button>
+      </div>
+      <p class="hint" style="margin-top:12px;">Apenas textos dos botões (lista JSON).</p>
+      <div class="row">
+        <button id="btn-import-texts" style="flex:1;">Importar textos</button>
+        <button id="btn-export-texts" style="flex:1;">Exportar textos</button>
+      </div>
+      <input type="file" id="file-full" accept=".json" hidden />
+      <input type="file" id="file-texts" accept=".json" hidden />
+      <div class="danger-zone">
+        <button id="btn-clear-data" class="danger" style="width:100%;">Resetar todos os dados</button>
+      </div>
+    </section>
+
+    </div><!-- /col-side -->
+
+    </div><!-- /columns -->
+
+  </div>
+
+  <!-- ─── Dialog: novo/editar texto ────────────────────────────────────── -->
+  <dialog id="text-dialog">
+    <h2 id="dialog-title">Novo texto</h2>
+    <div class="field">
+      <label for="f-label">Rótulo (título do botão)</label>
+      <input type="text" id="f-label" />
+    </div>
+    <div class="field">
+      <label for="f-text">Texto (conteúdo)</label>
+      <textarea id="f-text" rows="5"></textarea>
+    </div>
+    <div class="field">
+      <label for="f-category">Categoria</label>
+      <input type="text" id="f-category" list="cat-datalist" placeholder="Selecione ou digite uma nova..." />
+      <datalist id="cat-datalist"></datalist>
+    </div>
+    <div class="dialog-actions">
+      <button id="f-delete" class="danger">Excluir</button>
+      <span class="spacer"></span>
+      <button id="f-cancel">Cancelar</button>
+      <button id="f-save" class="accent">Salvar</button>
+    </div>
+  </dialog>
+
+  <div id="toast"></div>
+
+  <script src="js/shared.js"></script>
+  <script src="js/options.js"></script>
+</body>
+</html>

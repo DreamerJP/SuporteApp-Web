@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>SuporteApp</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/popup.css" />
+</head>
+<body>
+
+  <!-- Barra superior: IP + ações -->
+  <header id="topbar">
+    <input type="text" id="ip-input" placeholder="Cole o IP para abrir..." autocomplete="off" />
+    <button id="btn-paste-ip" class="ghost" title="Colar IP da área de transferência e abrir">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+      </svg>
+    </button>
+    <button id="btn-options" class="ghost" title="Configurações">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Abas de categoria -->
+  <nav id="category-tabs"></nav>
+
+  <!-- Grade de botões -->
+  <main id="grid"></main>
+
+  <!-- Easter Egg: Cosmic Snake (código Konami) -->
+  <div id="game-overlay">
+    <div class="game-header">
+      <span>SYSTEM_BREACH: COSMIC_SNAKE_DETECTED</span>
+      <button id="btn-close-game" class="ghost" title="Fechar">
+        <svg class="icon" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <iframe id="game-frame" src=""></iframe>
+  </div>
+
+  <!-- Busca fantasma (digite em qualquer lugar) -->
+  <div id="search-overlay">
+    <div class="search-hint">Filtrando por:</div>
+    <div id="search-query"></div>
+  </div>
+  <div class="search-timer-bar" id="search-timer-bar"></div>
+
+  <div id="toast"></div>
+
+  <script src="js/shared.js"></script>
+  <script src="js/popup.js"></script>
+</body>
+</html>

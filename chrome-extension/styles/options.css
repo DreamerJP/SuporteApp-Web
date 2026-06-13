@@ -1,0 +1,242 @@
+body {
+  min-height: 100vh;
+  padding: 32px 16px;
+}
+
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 14px;
+  align-items: start;
+}
+
+.col-main, .col-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .columns { grid-template-columns: 1fr; }
+}
+
+/* ─── Cabeçalho ─────────────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.page-header img { width: 42px; height: 42px; object-fit: contain; }
+.page-header h1 { font-size: 1.25rem; }
+.page-header p { font-size: 0.82rem; color: var(--text-muted); }
+
+/* ─── Cards de seção ────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.card h2 { font-size: 0.95rem; margin-bottom: 10px; }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-header h2 { margin-bottom: 0; }
+
+.card-actions { display: flex; align-items: center; gap: 6px; }
+
+#btn-reorder { font-size: 0.8rem; padding: 6px 10px; }
+
+#btn-reorder.active {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px; }
+
+.row { display: flex; gap: 8px; align-items: stretch; }
+.row input { flex: 1; }
+
+/* ─── Filtro de categorias ──────────────────────────────────────────────── */
+#cat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.chip {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.chip:hover { color: var(--text); border-color: var(--accent); background: transparent; }
+
+.chip.active {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+/* ─── Grade de textos (2 colunas — espelho exato do popup) ──────────────── */
+#texts-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+#texts-list .hint { grid-column: 1 / -1; margin: 0; }
+
+.text-card-opt {
+  min-width: 0;
+  padding: 9px 11px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.text-card-opt:hover { background: var(--surface-hover); border-color: var(--accent); }
+
+.text-card-opt .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.text-card-opt .label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-card-opt .badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.text-card-opt .preview {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Modo reorganizar ──────────────────────────────────────────────────── */
+#texts-list.reorder .text-card-opt {
+  cursor: grab;
+  border-style: dashed;
+}
+
+#texts-list.reorder .text-card-opt:hover { border-color: var(--accent); background: rgba(0, 0, 0, 0.15); }
+
+.text-card-opt.dragging { opacity: 0.35; cursor: grabbing; }
+
+.text-card-opt.drag-over {
+  border-color: var(--success) !important;
+  border-style: solid !important;
+  background: rgba(76, 175, 80, 0.1) !important;
+}
+
+/* ─── Aparência ─────────────────────────────────────────────────────────── */
+.color-row { display: flex; gap: 8px; }
+
+.color-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.color-item label { font-size: 0.82rem; }
+
+.color-item input[type="color"] {
+  width: 30px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+/* ─── Danger zone ───────────────────────────────────────────────────────── */
+.danger-zone {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── Dialog ────────────────────────────────────────────────────────────── */
+dialog {
+  width: 90%;
+  max-width: 480px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--text);
+}
+
+dialog::backdrop { background: rgba(0, 0, 0, 0.7); }
+
+dialog h2 { font-size: 1rem; color: var(--accent); margin-bottom: 16px; }
+
+.field { margin-bottom: 12px; }
+
+.field label {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.field textarea { resize: vertical; }
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.dialog-actions .spacer { flex: 1; }

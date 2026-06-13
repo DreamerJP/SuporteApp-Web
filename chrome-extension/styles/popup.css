@@ -1,0 +1,187 @@
+body {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Barra superior ────────────────────────────────────────────────────── */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+#ip-input { flex: 1; }
+
+/* ─── Abas de categoria ─────────────────────────────────────────────────── */
+#category-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+#category-tabs::-webkit-scrollbar { display: none; }
+
+.cat-tab {
+  padding: 6px 11px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.cat-tab:hover { background: var(--surface); color: var(--text); border-bottom-color: transparent; }
+
+.cat-tab.active {
+  background: var(--surface);
+  border-bottom-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ─── Grade de botões compactos ─────────────────────────────────────────── */
+#grid {
+  max-height: 460px;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: max-content;
+  gap: 6px;
+  align-content: start;
+}
+
+.text-card {
+  min-height: 36px;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: background var(--transition), border-color var(--transition);
+  font-size: 0.83rem;
+  overflow: hidden;
+}
+
+.text-card:hover { background: var(--surface-hover); border-color: var(--accent); }
+.text-card:active { transform: scale(0.97); }
+
+.text-card span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* ─── Easter Egg: Cosmic Snake ──────────────────────────────────────────── */
+#game-overlay { display: none; }
+
+body.game-mode #topbar,
+body.game-mode #category-tabs,
+body.game-mode #grid { display: none; }
+
+body.game-mode #game-overlay {
+  display: flex;
+  flex-direction: column;
+  height: 580px;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: #000;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.25);
+  flex-shrink: 0;
+}
+
+.game-header span {
+  font-family: monospace;
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  color: #00ffcc;
+}
+
+.game-header button { color: #00ffcc; }
+
+#game-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #000;
+}
+
+/* ─── Busca fantasma ────────────────────────────────────────────────────── */
+#search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#search-overlay.active { display: flex; }
+
+.search-hint {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  opacity: 0.3;
+}
+
+#search-query {
+  max-width: 95%;
+  overflow: hidden;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  opacity: 0.25;
+  white-space: nowrap;
+}
+
+#search-query.selected { opacity: 0.12; }
+
+.search-timer-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  width: 0%;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 101;
+}
+
+.text-card.search-match { border-color: #4ade80 !important; }
+
+/* ─── Estado vazio ──────────────────────────────────────────────────────── */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--text-muted);
+}
+
+.empty-state small { display: block; margin: 6px 0 14px; font-size: 0.78rem; opacity: 0.6; }

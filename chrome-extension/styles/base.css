@@ -1,0 +1,196 @@
+/* ─── Design Tokens (espelha o app web) ─────────────────────────────────── */
+:root {
+  --bg:            #1a1a2e;
+  --surface:       rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.09);
+  --border:        rgba(255, 255, 255, 0.1);
+  --accent:        #e94560;
+  --accent-text:   #ffffff;
+  --text:          #ffffff;
+  --text-muted:    #a0a0b0;
+  --success:       #4caf50;
+  --danger:        #ff4757;
+  --radius:        8px;
+  --radius-sm:     6px;
+  --transition:    0.15s ease;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", "Segoe UI Emoji", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ─── Icons ─────────────────────────────────────────────────────────────── */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* ─── Buttons ───────────────────────────────────────────────────────────── */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+
+button:hover { background: var(--surface-hover); border-color: var(--accent); }
+button:active { transform: translateY(1px); }
+
+button.accent {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: transparent;
+}
+
+button.accent:hover { filter: brightness(0.92); }
+
+button.ghost {
+  background: transparent;
+  border-color: transparent;
+  padding: 6px;
+  color: var(--text-muted);
+}
+
+button.ghost:hover { background: var(--surface); border-color: var(--border); color: var(--text); }
+
+button.danger {
+  color: var(--danger);
+  border-color: rgba(255, 71, 87, 0.3);
+  background: transparent;
+}
+
+button.danger:hover { background: rgba(255, 71, 87, 0.08); border-color: rgba(255, 71, 87, 0.5); }
+
+/* ─── Inputs ────────────────────────────────────────────────────────────── */
+input[type="text"],
+input[type="number"],
+input[type="url"],
+textarea {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 7px 10px;
+  transition: border-color var(--transition);
+  outline: none;
+  width: 100%;
+}
+
+input:focus, textarea:focus { border-color: var(--accent); }
+input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+/* ─── Toggle ────────────────────────────────────────────────────────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.toggle {
+  appearance: none;
+  width: 30px;
+  height: 17px;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.toggle::before {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: #fff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.16s ease;
+}
+
+.toggle:checked { background: var(--accent); }
+.toggle:checked::before { transform: translateX(13px); }
+
+/* ─── Tags (portas) ─────────────────────────────────────────────────────── */
+.tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.tag .icon { width: 11px; height: 11px; cursor: pointer; opacity: 0.4; }
+.tag .icon:hover { opacity: 1; }
+
+/* ─── Toast ─────────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 50px;
+  background: var(--success);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 500;
+  z-index: 5000;
+  transition: transform 0.25s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.error { background: var(--danger); }
